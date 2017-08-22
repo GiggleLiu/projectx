@@ -1,6 +1,6 @@
 import numpy as np
 
-from views import *
+from controller import *
 
 np.random.seed(2)
 run_rtheta(J2=0.5, nsite=10)

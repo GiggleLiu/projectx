@@ -14,5 +14,6 @@
 *.npy
 *.dvi
 *.log
+run_local.py
 
 deprecated/
