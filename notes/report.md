@@ -1,26 +1,32 @@
-#Report 1
+#Day 15 Aug
 
-## Parameters
-### A: J2 = 0.2, N = 10
+## Wave function
+
+### parameters
+
+* A: J2 = 0.2, N = 10
+
 Lowest 10 energies = [-4.15096326 -3.76842215 -3.70954039 -3.39455178 -3.39455178 -3.06084076
  -3.06084076 -2.96478367 -2.96478367 -2.83993641]
 
-### B: J2 = 0.5, N = 10
+* B: J2 = 0.5, N = 10
+
 Lowest 10 energies = [-3.75       -3.75       -3.39978825 -3.27928965 -3.27928965 -3.13824484
  -3.13824484 -3.13464932 -2.98733684 -2.98733684]
 
 Exists degeneracy, not a good example for bentchmarks.
 
-### C: J2 = 0.2, N = 4
+* C: J2 = 0.2, N = 4
 
-## Results
+### results
 
     1. Comparing to correct sign, error in sign can be much larger than in energy. They have smaller sample size or cancel each other?
     2. Given correct signs, NN can be trained more efficiently. Can we prove the optimization is convex when the "Hamiltonian" matrix is negative.
     3. At J2 = 0.5, we can not compare signs due to degeneracy (~ 50% correct).
     4. Only ~ 250/30240 different configurations appear in 10-site samples.
 
-## Parameter A
+### parameter A
+
 Lowest 10 energies = [-4.15096326 -3.76842215 -3.70954039 -3.39455178 -3.39455178 -3.06084076
  -3.06084076 -2.96478367 -2.96478367 -2.83993641]
 
@@ -116,10 +122,11 @@ Number of Samples Signed Incorrectly/All 1751/10000 (17.5100%)
 E/site = -0.415009002005 (-0.41509632551), Error = 0.0105%
 diff rate = 0.000833871120181(norm=1.382845482)
 
-## Wave Function
+### wave function
+
 $J_2= 0.2$, $|\langle \Psi|\Psi_0\rangle|^2 = 0.999771263796$
 
-![](WF_J20.2_N10.pdf)
+![WF_J20.2_N10](./WF_J20.2_N10.png)
 
 Day 15 Aug
 ==============================
@@ -201,3 +208,34 @@ $$\Delta_{loc}^\alpha=\frac{\partial\psi(\alpha,\beta,x)/\partial\alpha}{\psi(\a
 $$\Delta_{loc}^\beta=\frac{\partial\psi(\alpha,\beta,x)}{\partial\beta}=i\frac{\partial \theta(\beta,x)}{\partial\beta}$$
 
 will $G$ be real again in this imaginary time evolution?
+
+Day 23 Aug
+======================
+
+Violation of Marshall Sign Rule
+---------------------------
+
+![MSR-J1J2_N12](./MSR-J1J2_N12.png)
+
+$J_1,J_2$ model, 12 sites.
+
+Here, $E_0$ is evaluated using exact ground state wave function $v_0$.
+
+$E$ is evaluated using ${\rm MSR}(|v|)$. Here, $\rm MSR$ is Marshall Sign Rule function.
+
+To make it clear,
+
+![MSR-J1J2_N12_log](./MSR-J1J2_N12_log.png)
+
+we see when $J_2\leq0.4$, MSR is only slightly violated.
+
+To run this example, 
+```
+    from controllers import scale_ed_msr
+    scale_ed_msr(J2MIN=0, J2MAX=1, NJ2=51, size=(12,), yscale='log')
+```
+
+For $2D$  $4\times4$ model, we have the similar behavior
+
+![MSR-J1J22D_N16_log](./MSR-J1J22D_N16_log.png)
+
