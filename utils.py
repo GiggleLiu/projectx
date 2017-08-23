@@ -97,7 +97,7 @@ def check_sample(rbm, h, samples):
     configs, mask = subspace_mask(nsite, h.mag)
     #configs = configs[mask]
     hndim=len(configs)
-    config_inds = packnbits_pm(configs, nsite).ravel()
+    config_inds = packnbits_pm(configs)
     ind_map = np.zeros(2**nsite, dtype='int64')
     ind_map[config_inds] = np.arange(hndim)
     wf_sample = np.zeros(hndim)
@@ -122,7 +122,7 @@ def plot_count_stat(samples):
     plt.plot(counts)
 
 def subspace_mask(nsite, mag):
-    configs = unpacknbits_pm(np.arange(2**nsite)[:,None],nsite)
+    configs = unpacknbits_pm(np.arange(2**nsite),nsite)
     mask = configs.sum(axis=1)==mag
     configs = configs[mask]
     return configs, mask

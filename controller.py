@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.sparse as sps
+from profilehooks import profile
 import pdb
 
 from problems import ModelProbDef, load_hamiltonian
@@ -13,7 +14,7 @@ def run_rtheta(J2, nsite):
     h = load_hamiltonian('J1J2', nsite=nsite, J2=J2)
     #rbm = WangLei2(input_shape=(h.nsite,),num_feature_hidden=4, use_msr=False, theta_period=5)
     H = h.get_mat()
-    rbm = get_ground_toynn(h, mode='r-theta', train_amp=False, theta_period=2)
+    rbm = get_ground_toynn(h, mode='r-theta', train_amp=False, theta_period=nsite)
     pdb.set_trace()
     problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='gd', step_rate=3e-3)
     sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
@@ -75,4 +76,25 @@ def run_ed_msr(J2, nsite):
     scatter_vec_phase(v0[marshall_signs==1], color='r')
     scatter_vec_phase(v0[marshall_signs==-1], color='b')
     plt.legend([r'$+$', r'$-$'])
+    pdb.set_trace()
+
+@profile
+def scale_ed_msr(nsite, NJ2=11):
+    from qstate.classifier.rules import marshall_sign_rule
+    J2L = np.linspace(-2,2,NJ2)
+    e0l, el = [], []
+    for i,J2 in enumerate(J2L):
+        h = load_hamiltonian('J1J2', nsite=nsite, J2=J2)
+        H = h.get_mat()
+        e0, v0 = sps.linalg.eigsh(H, which='SA', k=1)
+        v0 = v0.ravel()
+        marshall_signs = marshall_sign_rule(h.configs)
+        v = abs(v0)*marshall_signs
+        el.append(v.T.conj().dot(H.dot(v)))
+        e0l.append(e0.item())
+        print('%s'%i)
+    plt.ion()
+    plt.plot(J2L, np.array(el)-e0l)
+    plt.xlabel(r'$J_2$')
+    plt.ylabel(r'$E-E_0$')
     pdb.set_trace()
