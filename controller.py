@@ -176,7 +176,7 @@ def run_rtheta(J2, nsite):
 def run_rtheta_mlp(J2, nsite, mlp_shape):
     from models.rtheta_mlp import RTheta_MLP
     # definition of a problem
-    h = load_hamiltonian('J1J2', nsite=nsite, J2=J2)
+    h = load_hamiltonian('J1J2', size=(nsite, ), J2=J2)
     rbm = RTheta_MLP(input_shape=(h.nsite,),num_feature_hidden=4, mlp_shape=mlp_shape, use_msr=False, theta_period=2)
     #rbm = get_ground_toynn(h, mode='r-theta', train_amp=False, theta_period=nsite)
     #pdb.set_trace()
