@@ -85,16 +85,22 @@ class ModelProbDef(ProbDef):
         super(ModelProbDef,self).__init__(hamiltonian, rbm, vmc, sr, optimizer, num_vmc_run=num_vmc_run, num_vmc_sample=num_vmc_sample)
 
 
-def load_hamiltonian(model, nsite, J2=0.2, periodic=True, **kwargs):
+def load_hamiltonian(model, size, periodic=True, **kwargs):
+    J1=kwargs.get('J1',1.0)
+    J1z=kwargs.get('J1z',J1)
+    J2=kwargs.get('J2',0)
+    J2z=kwargs.get('J2z',J2)
+    h=kwargs.get('h',0)
     if model=='AFH':
-        h=hamiltonians.HeisenbergH(nsite=nsite,J1=1.,J1z=1.,periodic=periodic, mag=0)
+        h=hamiltonians.HeisenbergH(nsite=size[0],J1=J1,J1z=J1z,periodic=periodic, mag=0)
     elif model=='J1J2':
-        h=hamiltonians.HeisenbergH(nsite=nsite,J1=1.,J1z=1.,J2=J2,J2z=J2,periodic=periodic, mag=0)
+        h=hamiltonians.HeisenbergH(nsite=size[0],J1=J1,J1z=J1z,J2=J2,J2z=J2,periodic=periodic, mag=0)
     elif model=='TFI':
-        h=hamiltonians.TFI(nsite=nsite,Jz=-4.,h=-1.,periodic=periodic, mag=None)
+        h=hamiltonians.TFI(nsite=size[0],Jz=J1z,h=h,periodic=periodic, mag=None)
     elif model=='AFH2D':
-        N1=N2=int(sqrt(nsite))
-        h=hamiltonians.HeisenbergH2D(N1,N2,J=-1.,Jz=1.,periodic=periodic, mag=0)
+        h=hamiltonians.HeisenbergH2D(size[0], size[1],J1=J1,J1z=J1z,periodic=periodic, mag=0)
+    elif model=='J1J22D':
+        h=hamiltonians.HeisenbergH2D(size[0], size[1],J1=J1,J1z=J1z,J2=J2,J2z=J2z,periodic=periodic, mag=0)
     else:
         raise ValueError()
     return h

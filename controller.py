@@ -11,7 +11,7 @@ from qstate.sampler import get_ground_toynn
 def run_rtheta_toy(J2, nsite):
     from models.wanglei2 import WangLei2
     # definition of a problem
-    h = load_hamiltonian('J1J2', nsite=nsite, J2=J2)
+    h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
     #rbm = WangLei2(input_shape=(h.nsite,),num_feature_hidden=4, use_msr=False, theta_period=5)
     H = h.get_mat()
     rbm = get_ground_toynn(h, mode='r-theta', train_amp=False, theta_period=nsite)
@@ -67,7 +67,7 @@ def run_rtheta_toy(J2, nsite):
 
 def run_ed_msr(J2, nsite):
     from qstate.classifier.rules import marshall_sign_rule
-    h = load_hamiltonian('J1J2', nsite=nsite, J2=J2)
+    h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
     H = h.get_mat()
     e0, v0 = sps.linalg.eigsh(H, which='SA', k=1)
     v0 = v0.ravel()
@@ -79,16 +79,19 @@ def run_ed_msr(J2, nsite):
     pdb.set_trace()
 
 @profile
-def scale_ed_msr(nsite, NJ2=11):
+def scale_ed_msr(size, J2MIN=0, J2MAX=1, NJ2=51, yscale='log'):
     from qstate.classifier.rules import marshall_sign_rule
-    J2L = np.linspace(-2,2,NJ2)
+    J2L = np.linspace(J2MIN, J2MAX, NJ2)
     e0l, el = [], []
     for i,J2 in enumerate(J2L):
-        h = load_hamiltonian('J1J2', nsite=nsite, J2=J2)
+        if len(size)==1:
+            h = load_hamiltonian('J1J2', size=size, J2=J2)
+        else:
+            h = load_hamiltonian('J1J22D', size=size, J2=J2)
         H = h.get_mat()
         e0, v0 = sps.linalg.eigsh(H, which='SA', k=1)
         v0 = v0.ravel()
-        marshall_signs = marshall_sign_rule(h.configs)
+        marshall_signs = marshall_sign_rule(h.configs, size=size)
         v = abs(v0)*marshall_signs
         el.append(v.T.conj().dot(H.dot(v)))
         e0l.append(e0.item())
@@ -97,6 +100,7 @@ def scale_ed_msr(nsite, NJ2=11):
     plt.plot(J2L, np.array(el)-e0l)
     plt.xlabel(r'$J_2$')
     plt.ylabel(r'$E-E_0$')
+    plt.yscale(yscale)
     pdb.set_trace()
 
 
