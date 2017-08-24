@@ -7,7 +7,8 @@ import pdb
 
 from poornn.utils import typed_randn
 from poornn import SPConv, Linear, functions
-from qstate.classifier import PSNN
+#from qstate.classifier import PSNN
+from models.psnn import PSNN
 from qstate import StateNN
 
 __all__=['WangLei2']
@@ -24,7 +25,7 @@ class WangLei2(StateNN):
     def __init__(self, input_shape, num_feature_hidden, with_linear=False, use_msr=False, theta_period=2):
         self.num_feature_hidden = num_feature_hidden
         self.use_msr = use_msr
-        dtype = 'float64'
+        dtype = 'complex128'
         self.with_linear = with_linear
         nsite=np.prod(input_shape)
         eta=0.1
@@ -38,8 +39,10 @@ class WangLei2(StateNN):
         self.add_layer(functions.Sum, axis=-1)
         self.add_layer(functions.Exp)
         if with_linear:
-            self.add_layer(Linear, weight=eta*typed_randn(dtype, (1, self.num_feature_hidden)),
-                    bias=0*typed_randn(dtype, (1,)))
+            #self.add_layer(Linear, weight=eta*typed_randn(dtype, (1, self.num_feature_hidden)),
+            #        bias=0*typed_randn(dtype, (1,)))
+            self.add_layer(Linear, weight=np.array([[1,1,-1,-1]], dtype=dtype),
+                    bias=0*typed_randn(dtype, (1,)),var_mask=(0,0))
             self.add_layer(functions.Reshape, output_shape=())
 
         if use_msr and theta_period!=2:

@@ -77,7 +77,6 @@ def compare_wf(vv, v0):
 
     # pivot
     overlap = v0.dot(vv)
-    print np.angle(overlap)
     vv = vv*np.exp(-1j*np.angle(overlap))
 
     print('|<Psi_0|Psi>|^2 = %s'%abs(overlap)**2)
@@ -94,17 +93,14 @@ def check_sample(rbm, h, samples):
     H=h.get_mat(dense=False)
     print 'ExactVMC E/site = %s'%(v.conj().T.dot(H.dot(v)).item()/nsite)
 
-    configs, mask = subspace_mask(nsite, h.mag)
-    #configs = configs[mask]
+    configs = h.configs
     hndim=len(configs)
-    config_inds = packnbits_pm(configs)
-    ind_map = np.zeros(2**nsite, dtype='int64')
-    ind_map[config_inds] = np.arange(hndim)
     wf_sample = np.zeros(hndim)
-    wf_sample[ind_map[samples.config_inds]] = np.array(samples.counts, dtype='float64')/samples.num_sample
+    wf_sample[h.config_indexer[samples.config_inds]] = np.array(samples.counts, dtype='float64')/samples.num_sample
 
     plt.plot(abs(v)**2, color ='k')
     plt.plot(wf_sample, color ='r')
+    plt.xticks(np.arange(hndim), packnbits_pm(configs))
     plt.legend(['exact', 'vmc'])
 
 def plot_sign_mat(sign_classifier):

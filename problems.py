@@ -53,7 +53,7 @@ class ModelProbDef(ProbDef):
         self.reg_method = reg_method
         #Create a VMC sampling engine.
         cgen=SpinConfigGenerator(initial_config=[-1,1]*(hamiltonian.nsite/2)+\
-                [1]*(hamiltonian.nsite%2),nflip=2 if hamiltonian.mag is not None else 1)
+                [1]*(hamiltonian.nsite%2),nflip=2 if hamiltonian.mag is not None else 1, inverse_rate=0.05)
         vmc=VMC(cgen, nbath=200*hamiltonian.nsite, measure_step=hamiltonian.nsite,sampling_method='metropolis')
 
         ##################### choose an regulation method ##############################
