@@ -7,7 +7,8 @@ import pdb
 
 from poornn.utils import typed_randn
 from poornn import SPConv, Linear, functions
-from qstate.classifier import PSNN
+#from qstate.classifier import PSNN
+from psnn import PSNN
 from qstate import StateNN
 
 __all__=['RTheta_MLP']
