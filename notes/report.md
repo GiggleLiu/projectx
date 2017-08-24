@@ -239,3 +239,12 @@ For $2D$  $4\times4$ model, we have the similar behavior
 
 ![MSR-J1J22D_N16_log](./MSR-J1J22D_N16_log.png)
 
+## Training large $J_2$
+For large $J_2$, MSR is strongly violated, as a result, neural networks are extremely hard to train. For example $J_2=0.8$.
+* given sign, 1-layer RBM, after 300 steps of SR($\delta=10^{-4}$ regulation) training,  $\|\langle\Psi_0|\Psi\rangle\|_2\simeq0.999$, Error in energy is about $0.05\%$.
+
+  ![Exact-Sign-J20.8-RBM](./Exact-Sign-J20.8-RBM.png)
+
+* not given sign, complex 1 Conv-Layer + 2 Linear-Layer (with 16, 8 features), $\|\langle\Psi_0|\Psi\rangle\|_2\simeq0.57$, Error in energy is about $2.5\%$.
+
+  ![WL_16](./WL_16.png)

@@ -135,3 +135,8 @@ def scatter_vec_phase(v, v0=None, color='r', color0='b'):
         plt.scatter(x0,y0,s=20, color=color0)
     plt.xlabel('$\Re[\Psi]$')
     plt.ylabel('$\Im[\Psi]$')
+
+def sign_func_from_vec(configs, v):
+    config_inds = packnbits_pm(configs)
+    d = dict(zip(config_inds, np.sign(v)))
+    return lambda config: d[packnbits_pm(config)]
