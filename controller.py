@@ -8,17 +8,26 @@ from problems import ModelProbDef, load_hamiltonian
 from utils import scatter_vec_phase, compare_wf, analyse_exact, check_sample, sign_func_from_vec
 from qstate.sampler import get_ground_toynn
 
-def run_rtheta_toy(J2, nsite):
+def run_rtheta_toy(J2, nsite, version):
     from models.wanglei2 import WangLei2
-    from models.psnn import PSNN
+    from models.toythnn import ToyTHNN
+    if version=='2l':
+        from models.psnn import PSNN
+        thnn = PSNN((nsite,), nf=16, batch_wise=False, period=2, output_mode='theta', use_msr=False)
+        pdb.set_trace()
+    elif version=='1l':
+        from qstate.classifier import PSNN
+        thnn = PSNN((nsite,), batch_wise=False, period=2, output_mode='theta', use_msr=False)
+    elif version=='toy':
+        thnn=ToyTHNN(h)
     # definition of a problem
     h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
     H = h.get_mat()
-    thnn = PSNN((nsite,), 2, kernel='cos',nf=4, batch_wise=False, output_mode='theta', use_msr=False):
     rbm = get_ground_toynn(h, thnn=thnn, train_amp=False, theta_period=nsite)
     problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='gd', step_rate=1e-2)
     sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
-    sr.rtheta_training_ratio = 30
+    sr.rtheta_training_ratio = 1
+    optimizer.momentum=0.9
 
     do_plot_wf = True
     compare_to_exact = True
@@ -58,7 +67,8 @@ def run_rtheta_toy(J2, nsite):
             print('E/site = %s'%(ei/h.nsite,))
         el.append(ei)
 
-        if info['n_iter']>=800:
+        if info['n_iter']>=300:
+            plt.savefig('data/SIGN-N%s-J2%s-%s.png'%(nsite,J2,version))
             break
         print '\nRunning %s-th Iteration.'%(info['n_iter']+1)
 

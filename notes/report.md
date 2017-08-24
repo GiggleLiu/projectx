@@ -186,8 +186,10 @@ Day 20 Aug
 ## Do translational invariance allow a change of sign?
 
 Yes, for example, 6 site version Marshall Sign Rule (MSR), we can have 3 up spins in the ground state, 
-e.g. 1, 2 up spins in A, B sublattices respectively.
+e.g. 1, 2 up spins in A, B sub-lattices respectively.
 When we shift the spin configuration for 1-site, the sign changes according to MSR.
+
+However, for real Hamiltonian, $T_1|\Psi\rangle=\pm|\Psi\rangle$. In Heisenberg model, $-1$ corresponds to $2\times odd$ number of spins.
 
 ## r-theta version Stochastic Reconfiguration
 In traditional SR, we have
@@ -207,7 +209,12 @@ $$\Delta_{loc}^\alpha=\frac{\partial\psi(\alpha,\beta,x)/\partial\alpha}{\psi(\a
 
 $$\Delta_{loc}^\beta=\frac{\partial\psi(\alpha,\beta,x)}{\partial\beta}=i\frac{\partial \theta(\beta,x)}{\partial\beta}$$
 
-will $G$ be real again in this imaginary time evolution?
+* must $G$ be complex in this imaginary time evolution?
+* $S$ is block diagonal?
+
+$S$ is block diagonal means $S(\alpha,\beta)\equiv\langle\Delta^{\alpha\dagger}_{loc}\Delta^{\beta}_{loc}\rangle-\langle\Delta_{loc}^{\alpha\dagger}\rangle\langle\Delta_{loc}^{\beta}\rangle=0$
+
+or it will be block diagonal layer wise? as Roger Luo commented.
 
 Day 23 Aug
 ======================
@@ -248,3 +255,17 @@ For large $J_2$, MSR is strongly violated, as a result, neural networks are extr
 * not given sign, complex 1 Conv-Layer + 2 Linear-Layer (with 16, 8 features), $\|\langle\Psi_0|\Psi\rangle\|_2\simeq0.57$, Error in energy is about $2.5\%$.
 
   ![WL_16](./WL_16.png)
+
+  ## Given Amplitude to train sign
+
+  $J_2=0.8, N=10, E_G=-0.433768079327$.
+
+  For vectors, ![WL_16](./SIGN-N10-J20.8-2.png)
+
+For 1-layer/2-layer network, $E=-0.145755657726, overlap = 0.09$, they do not converge!
+
+![WL_16](./SIGN-N10-J20.8-1l.png)
+
+without TI, even worse.
+
+How can gradient descent work in sign networks?
