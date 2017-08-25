@@ -4,7 +4,7 @@ from controller import *
 
 np.random.seed(2)
 
-N=10
+N=20
 # depth benchmark
 run_rtheta_mlp(J2=0.8, nsite=N, mlp_shape=[128])
 run_rtheta_mlp(J2=0.8, nsite=N, mlp_shape=[128, 64])

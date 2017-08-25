@@ -190,7 +190,7 @@ def run_rtheta_mlp(J2, nsite, mlp_shape):
     rbm = RTheta_MLP(input_shape=(h.nsite,),num_feature_hidden=4, mlp_shape=mlp_shape, use_msr=False, theta_period=2)
     #rbm = get_ground_toynn(h, mode='r-theta', train_amp=False, theta_period=nsite)
     #pdb.set_trace()
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='gd', step_rate=3e-3)
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='adam', step_rate=3e-3)
     sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
     sr.rtheta_training_ratio = 30
 
