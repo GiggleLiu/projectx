@@ -46,8 +46,9 @@ class RTheta_MLP(StateNN):
             self.add_layer(functions.ReLU)
         self.add_layer(Linear, weight=eta*typed_randn(dtype, (1, mlp_shape[-1])),
                 bias=0*typed_randn(dtype, (1,)))
+        self.add_layer(functions.ReLU)
         self.add_layer(functions.Reshape, output_shape=())
-
+        # self.add_layer(functions.Exp)
         if use_msr and theta_period!=2:
             raise ValueError()
         self.thnn = PSNN(input_shape, period=theta_period, batch_wise=False, output_mode='theta', use_msr=use_msr)
