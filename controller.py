@@ -5,19 +5,29 @@ from profilehooks import profile
 import pdb
 
 from problems import ModelProbDef, load_hamiltonian
-from utils import scatter_vec_phase, compare_wf, analyse_exact, check_sample
+from utils import scatter_vec_phase, compare_wf, analyse_exact, check_sample, sign_func_from_vec
 from qstate.sampler import get_ground_toynn
 
-def run_rtheta_toy(J2, nsite):
+def run_rtheta_toy(J2, nsite, version):
     from models.wanglei2 import WangLei2
+    from models.toythnn import ToyTHNN
+    if version=='2l':
+        from models.psnn import PSNN
+        thnn = PSNN((nsite,), nf=16, batch_wise=False, period=2, output_mode='theta', use_msr=False)
+        pdb.set_trace()
+    elif version=='1l':
+        from qstate.classifier import PSNN
+        thnn = PSNN((nsite,), batch_wise=False, period=2, output_mode='theta', use_msr=False)
+    elif version=='toy':
+        thnn=ToyTHNN(h)
     # definition of a problem
     h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
     H = h.get_mat()
-    rbm = get_ground_toynn(h, mode='r-theta', train_amp=False, theta_period=nsite)
-    pdb.set_trace()
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='adam', step_rate=3e-3)
+    rbm = get_ground_toynn(h, thnn=thnn, train_amp=False, theta_period=nsite)
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='gd', step_rate=1e-2)
     sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
-    sr.rtheta_training_ratio = 30
+    sr.rtheta_training_ratio = 1
+    optimizer.momentum=0.9
 
     do_plot_wf = True
     compare_to_exact = True
@@ -57,7 +67,8 @@ def run_rtheta_toy(J2, nsite):
             print('E/site = %s'%(ei/h.nsite,))
         el.append(ei)
 
-        if info['n_iter']>=800:
+        if info['n_iter']>=300:
+            plt.savefig('data/SIGN-N%s-J2%s-%s.png'%(nsite,J2,version))
             break
         print '\nRunning %s-th Iteration.'%(info['n_iter']+1)
 
@@ -239,14 +250,14 @@ def run_rtheta_mlp(J2, nsite, mlp_shape):
     np.savetxt('data/rtheta-%sel-%s%s.dat'%(number, h.nsite,'p' if h.periodic else 'o'),el,fmt='%.10f%+.10fj')
     #pdb.set_trace()
 
-
 def run_wanglei(J2, nsite):
     from models.wanglei import WangLei
     # definition of a problem
     h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
     rbm = WangLei(input_shape=(h.nsite,),num_features=[16, 8], version='linear', use_conv=True, dtype='complex128')
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method='adam', step_rate=1e-1)
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method='gd', step_rate=1e-1)
     sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    vmc.inverse_rate = 0.05
 
     do_plot_wf = True
     compare_to_exact = True
@@ -297,4 +308,61 @@ def run_wanglei(J2, nsite):
     np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
     pdb.set_trace()
 
+def rbm_given_sign(J2, nsite):
+    from models.poorrbm import RBM
+    do_plot_wf = True
+    compare_to_exact = True
 
+    # definition of a problem
+    h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
+    # Exact Results
+    if compare_to_exact or compare_wf:
+        H, e0, v0, configs = analyse_exact(h, do_printsign=False)
+
+    rbm = RBM(input_shape=(h.nsite,),num_feature_hidden=4, dtype='float64', sign_func = sign_func_from_vec(h.configs, v0))
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method='gd', step_rate=1e-2)
+    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    vmc.inverse_rate = 0.05
+
+    # setup canvas
+    if do_plot_wf:
+        plt.ion()
+        fig=plt.figure(figsize=(10,5))
+
+
+    el=[] # to store energy
+    vv_pre = None
+    print '\nRunning 0-th Iteration.'
+    for info in optimizer:
+        # `sampels` and `opq_vals` are cached!
+        ei = problem.cache['opq_vals'][0]  
+
+        if do_plot_wf:
+            vv = rbm.tovec(mag=h.mag)
+            vv = vv/np.linalg.norm(vv)
+
+            fig.clear()
+            plt.subplot(121)
+            compare_wf(vv, v0)
+            plt.subplot(122)
+            scatter_vec_phase(vv, vv_pre)
+            plt.xlim(-0.3,0.3)
+            plt.ylim(-0.3,0.3)
+            plt.pause(0.01)
+            vv_pre = vv
+
+        if compare_to_exact:
+            err=abs(e0-ei)/(abs(e0)+abs(ei))*2
+            print('E/site = %s (%s), Error = %.4f%%'%(ei/h.nsite,e0/h.nsite,err*100))
+        else:
+            print('E/site = %s'%(ei/h.nsite,))
+        el.append(ei)
+
+        num_iter = info['n_iter']
+        #optimizer.step_rate *= 0.995
+        if num_iter>=2000:
+            break
+        print '\nRunning %s-th Iteration.'%(num_iter+1)
+
+    np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
+    pdb.set_trace()

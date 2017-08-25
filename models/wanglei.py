@@ -22,7 +22,7 @@ class WangLei(StateNN):
     def __init__(self, input_shape, num_features=[12], dtype='float64',use_conv=True,version='linear'):
         self.num_features, self.dtype = num_features, dtype
         nsite=np.prod(input_shape)
-        eta=0.05
+        eta=0.2
         super(WangLei, self).__init__(dtype, do_shape_check=True)
 
         stride = nsite
