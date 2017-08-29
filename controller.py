@@ -195,7 +195,7 @@ def run_rtheta_mlp(J2, nsite, mlp_shape):
     rbm = RTheta_MLP(input_shape=(h.nsite,),num_feature_hidden=4, mlp_shape=mlp_shape, use_msr=False, theta_period=2)
     #rbm = get_ground_toynn(h, mode='r-theta', train_amp=False, theta_period=nsite)
     #pdb.set_trace()
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='gd', step_rate=3e-3)
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='adam', step_rate=3e-3)
     sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
     sr.rtheta_training_ratio = [1.,30.]
 
@@ -244,7 +244,7 @@ def run_rtheta_mlp(J2, nsite, mlp_shape):
             print('E/site = %s'%(ei/h.nsite,))
         el.append(ei)
 
-        if info['n_iter']>=1000:
+        if info['n_iter']>=1:
             break
         print '\nRunning %s-th Iteration.'%(info['n_iter']+1)
 
@@ -489,14 +489,6 @@ def run_target_sign(J2, nsite):
             plt.ylim(-0.3,0.3)
             plt.pause(0.01)
             vv_pre = vv
-
-        if compare_to_exact:
-            err=abs(e0-ei)/(abs(e0)+abs(ei))*2
-            print('E/site = %s (%s), Error = %.4f%%'%(ei/h.nsite,e0/h.nsite,err*100))
-        else:
-            print('E/site = %s'%(ei/h.nsite,))
-        el.append(ei)
-
         num_iter = info['n_iter']
         #optimizer.step_rate *= 0.995
         if num_iter>=200:
@@ -536,3 +528,59 @@ def get_exact_thnn4():
     print W1
     pdb.set_trace()
     return var_conv, var_linear
+
+def run_rtheta_mlp_exp(J2, nsite, mlp_shape):
+    from models.rtheta_mlp_exp import RTheta_MLP_EXP
+    # definition of a problem
+    h = load_hamiltonian('J1J2', size=(nsite, ), J2=J2)
+    rbm = RTheta_MLP_EXP(input_shape=(h.nsite,),num_feature_hidden=4, mlp_shape=mlp_shape, use_msr=False, theta_period=2)
+    #rbm = get_ground_toynn(h, mode='r-theta', train_amp=False, theta_period=nsite)
+    #pdb.set_trace()
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='adam', step_rate=3e-3)
+    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    sr.rtheta_training_ratio = 30
+
+    # do_plot_wf = True
+    compare_to_exact = True
+
+    # setup canvas
+    # if do_plot_wf:
+    #     plt.ion()
+    #     fig=plt.figure(figsize=(10,5))
+
+        # if do_plot_wf:
+        #     # vv = rbm.tovec(mag=h.mag)
+        #     amp = []
+        #     signs = []
+        #     for config in h.configs:
+        #         amp.append(rbm.forward(config)[-1])
+        #         signs.append(rbm.get_sign(config))
+        #     amp = np.asarray(amp)
+        #     amp = amp/np.linalg.norm(amp)
+        #     vv = amp*signs
+
+        #     plt.clf()
+        #     plt.subplot(121)
+        #     compare_wf(amp, v0)
+        #     plt.subplot(122)
+        #     scatter_vec_phase(vv, vv_pre)
+        #     plt.pause(0.1)
+        #     vv_pre = vv
+
+        if compare_to_exact:
+            err=abs(e0-ei)/(abs(e0)+abs(ei))*2
+            print('E/site = %s (%s), Error = %.4f%%'%(ei/h.nsite,e0/h.nsite,err*100))
+        else:
+            print('E/site = %s'%(ei/h.nsite,))
+        el.append(ei)
+
+        if info['n_iter']>=1000:
+            break
+        print '\nRunning %s-th Iteration.'%(info['n_iter']+1)
+
+    number = ''
+    for i in mlp_shape:
+        number += str(i)
+        number += '-'
+    np.savetxt('data/rtheta-mlp-exp-%sel-%s%s.dat'%(number, h.nsite,'p' if h.periodic else 'o'),el,fmt='%.10f%+.10fj')
+    #pdb.set_trace()

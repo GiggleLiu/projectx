@@ -11,9 +11,9 @@ from poornn import SPConv, Linear, functions
 from psnn import PSNN
 from qstate import StateNN
 
-__all__=['RTheta_MLP']
+__all__=['RTheta_MLP_EXP']
 
-class RTheta_MLP(StateNN):
+class RTheta_MLP_EXP(StateNN):
     '''
     Restricted Boltzmann Machine class.
 
@@ -28,7 +28,7 @@ class RTheta_MLP(StateNN):
         dtype = 'float64'
         nsite=np.prod(input_shape)
         eta=0.1
-        super(RTheta_MLP, self).__init__(dtype, do_shape_check=False)
+        super(RTheta_MLP_EXP, self).__init__(dtype, do_shape_check=False)
 
         self.layers.append(functions.Reshape(input_shape, dtype=dtype, output_shape=(1,)+input_shape))
         self.add_layer(SPConv, weight=eta*typed_randn(dtype, (self.num_feature_hidden, 1, nsite)),
@@ -47,8 +47,8 @@ class RTheta_MLP(StateNN):
         self.add_layer(Linear, weight=eta*typed_randn(dtype, (1, mlp_shape[-1])),
                 bias=0*typed_randn(dtype, (1,)))
         # self.add_layer(functions.ReLU)
+        self.add_layer(functions.Exp)
         self.add_layer(functions.Reshape, output_shape=())
-        # self.add_layer(functions.Exp)
         if use_msr and theta_period!=2:
             raise ValueError()
         self.thnn = PSNN(input_shape, period=theta_period, batch_wise=False, output_mode='theta', use_msr=use_msr)
@@ -62,13 +62,13 @@ class RTheta_MLP(StateNN):
             return np.exp(1j*thys[-1])
 
     def get_variables(self):
-        return np.concatenate([super(RTheta_MLP,self).get_variables(), self.thnn.get_variables()])
+        return np.concatenate([super(RTheta_MLP_EXP,self).get_variables(), self.thnn.get_variables()])
 
     def set_variables(self, v):
-        nv1=super(RTheta_MLP, self).num_variables
-        super(RTheta_MLP, self).set_variables(v[:nv1])
+        nv1=super(RTheta_MLP_EXP, self).num_variables
+        super(RTheta_MLP_EXP, self).set_variables(v[:nv1])
         self.thnn.set_variables(v[nv1:])
 
     @property
     def num_variables(self):
-        return super(RTheta_MLP, self).num_variables+self.thnn.num_variables
+        return super(RTheta_MLP_EXP, self).num_variables+self.thnn.num_variables

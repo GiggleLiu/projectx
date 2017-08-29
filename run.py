@@ -1,8 +1,14 @@
+import yaml
 import numpy as np
-
 from controller import *
+from multiprocessing import Process
 
 np.random.seed(2)
-#run_rtheta(J2=0.8, nsite=10)
-#run_ed_msr(J2=0.8, nsite=16)
-scale_ed_msr(NJ2=51, size=(4,4))
+
+def load_config(name):
+    stream = file(name, 'r')
+    yaml_configs = yaml.load(stream)
+    print 'Project name: %s' % (yaml_configs['project'])
+    tasks = yaml_configs['task']
+    for task in tasks:
+        task[]

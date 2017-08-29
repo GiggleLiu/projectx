@@ -1,0 +1,17 @@
+project: DepthBenchmark
+
+task:
+  - optimizer: adam
+    step: 3.0e-3
+    iterations: 1000
+    regulization: sd
+    hamiltonian:
+      name: J1J2
+      size: 10
+      J2: 0.5
+    model:
+      name: RTheta_MLP
+      mlp_shape: [128]
+      use_msr: False
+      theta_period: 2
+    compare2exact: True
