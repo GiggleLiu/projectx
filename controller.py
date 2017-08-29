@@ -239,7 +239,7 @@ def run_rtheta_mlp(J2, nsite, mlp_shape):
             print('E/site = %s'%(ei/h.nsite,))
         el.append(ei)
 
-        if info['n_iter']>=1000:
+        if info['n_iter']>=1:
             break
         print '\nRunning %s-th Iteration.'%(info['n_iter']+1)
 
