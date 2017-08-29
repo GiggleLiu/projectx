@@ -39,10 +39,9 @@ def measure_opq(rbm, opq, samples, sign_strategy=('NONE',{})):
     opq_vals = opq.eval_on_samples(samples, rbm, update_samples=True)
     return opq_vals
 
-def analyse_exact(h, do_printsign=False):
+def analyse_exact(h, do_printsign=False, num_eng=1):
     '''using ExactVMC to get exact result.'''
     #get exact ground state vector
-    num_eng=10
     nsite=h.nsite
     H = h.get_mat(dense=False).real
     configs, mask = subspace_mask(nsite,mag=h.mag)
@@ -73,7 +72,7 @@ def plot_wf_distri(h, v0):
     pdb.set_trace()
 
 def compare_wf(vv, v0):
-    if vv.dot(v0)<0: vv=-vv
+    #if vv.dot(v0)<0: vv=-vv
 
     # pivot
     overlap = v0.dot(vv)
@@ -123,7 +122,7 @@ def subspace_mask(nsite, mag):
     configs = configs[mask]
     return configs, mask
 
-def scatter_vec_phase(v, v0=None, color='r', color0='b'):
+def scatter_vec_phase(v, v0=None, color='r', color0='b', winding=None):
     '''
     show the amplitude-phase graph in complex plane.
     '''
@@ -133,6 +132,9 @@ def scatter_vec_phase(v, v0=None, color='r', color0='b'):
         x0,y0 = v0.real, v0.imag
         plt.quiver(x0,y0,x-x0,y-y0, angles='xy', units='xy', scale=1)
         plt.scatter(x0,y0,s=20, color=color0)
+    if winding is not None:
+        for xi, yi, wi in zip(x,y,winding):
+            plt.text(xi,yi,'%s'%wi, ha='left', va='bottom')
     plt.xlabel('$\Re[\Psi]$')
     plt.ylabel('$\Im[\Psi]$')
 

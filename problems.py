@@ -49,7 +49,8 @@ class ModelProbDef(ProbDef):
             * carleo, the carleo's version, buggy!.
             * pinv, use pseudo-inverse.
     '''
-    def __init__(self, hamiltonian, rbm, reg_method, optimize_method, step_rate, num_vmc_run=1, num_vmc_sample=1000):
+    def __init__(self, hamiltonian, rbm, reg_method, optimize_method, step_rate,
+            num_vmc_run=1, num_vmc_sample=1000, sr_layerwise=True):
         self.reg_method = reg_method
         #Create a VMC sampling engine.
         cgen=SpinConfigGenerator(initial_config=[-1,1]*(hamiltonian.nsite/2)+\
@@ -70,7 +71,7 @@ class ModelProbDef(ProbDef):
         else:
             raise ValueError('Can not load predefined regulation method %s'%reg_method)
 
-        sr=SR(hamiltonian, reg_params=reg_params, mode='r-theta' if hasattr(rbm,'thnn') else 'single-net', rtheta_training_ratio=30.)
+        sr=SR(hamiltonian, reg_params=reg_params, state=rbm, rtheta_training_ratio=[1.,30.], layer_wise=sr_layerwise)
 
         ##################### choose a optimization method with above gradients known ##############################
         if optimize_method == 'rmsprop':

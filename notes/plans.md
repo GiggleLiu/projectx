@@ -20,8 +20,10 @@ JgLiu:
 - [ ] formula: stochastic reconfiguration, the $r-\theta$ version
 - [x] VMC with 5% chance flip a configuration
 - [x] train $\theta$ with amplitude fixed, plot it.
-- [ ] translational invariance
+- [x] translational invariance
 - [ ] test $2D $ $J_1-J_2$ model
+- [ ] representation power of $\theta$ network
+- [ ] note: networks.
 
 Roger:
 

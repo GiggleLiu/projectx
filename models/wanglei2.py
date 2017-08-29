@@ -8,7 +8,7 @@ import pdb
 from poornn.utils import typed_randn
 from poornn import SPConv, Linear, functions
 #from qstate.classifier import PSNN
-from models.psnn import PSNN
+from psnn import PSNN
 from qstate import StateNN
 
 __all__=['WangLei2']
@@ -22,10 +22,9 @@ class WangLei2(StateNN):
         :num_feature_hidden: int, number features in hidden layer.
         :use_msr: use marshall sign rule.
     '''
-    def __init__(self, input_shape, num_feature_hidden, with_linear=False, use_msr=False, theta_period=2):
+    def __init__(self, input_shape, num_feature_hidden, with_linear=False, use_msr=False, theta_period=2, dtype='float64'):
         self.num_feature_hidden = num_feature_hidden
         self.use_msr = use_msr
-        dtype = 'complex128'
         self.with_linear = with_linear
         nsite=np.prod(input_shape)
         eta=0.1

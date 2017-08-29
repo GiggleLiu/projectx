@@ -192,7 +192,14 @@ When we shift the spin configuration for 1-site, the sign changes according to M
 However, for real Hamiltonian, $T_1|\Psi\rangle=\pm|\Psi\rangle$. In Heisenberg model, $-1$ corresponds to $2\times odd$ number of spins.
 
 ## r-theta version Stochastic Reconfiguration
-In traditional SR, we have
+To get the time evolution of parameters, we start from the Lagrangian
+
+$L=\left[\frac{i}{2}(\langle\dot{\psi(\alpha,\beta)}|\psi(\alpha,\beta)\rangle-\langle\psi(\alpha,\beta)|\dot{\psi(\alpha,\beta)}\rangle)-\langle\psi(\alpha,\beta)|H|\psi(\alpha,\beta)\rangle\right]/\langle\psi(\alpha,\beta)|\psi(\alpha,\beta)\rangle$
+
+To achieve minimum action, we apply Euler-Lagrangian formula $\frac{\partial L}{\partial \alpha}-\frac{d}{dt}(\frac{\partial L}{\partial \dot{\alpha}})$, 
+
+
+
 $$S(\alpha,\alpha')\equiv\langle\Delta^{\alpha\dagger}_{loc}\Delta^{\alpha'}_{loc}\rangle-\langle\Delta_{loc}^{\alpha\dagger}\rangle\langle\Delta_{loc}^{\alpha'}\rangle$$
 
 $F(\alpha)\equiv\langle\Delta_{loc}^{\alpha\dagger} E_{loc}\rangle-\langle\Delta_{loc}^{\alpha\dagger}\rangle\langle E_{loc}\rangle$
@@ -269,3 +276,31 @@ For 1-layer/2-layer network, $E=-0.145755657726, overlap = 0.09$, they do not co
 without TI, even worse.
 
 How can gradient descent work in sign networks?
+
+
+
+# Day 29 Aug
+
+Representation power of a linear $\theta$-network.
+
+$L=4, J_2=0.8,S_z=0$
+
+Bases of Hilbert space are $\sigma_{1-6}\in\{|++--\rangle,|+-+-\rangle,|+--+\rangle,|-++-\rangle,|-+-+\rangle,|--++\rangle\}$.
+
+Here, $+$ represents spin $\uparrow$ or $+1$.
+
+The sign structure of ground state is $\{-,0,+,+,0,-\}$, our task is to construct a network of function $\theta$ that $\theta(\sigma_{1,3,4,6})\%2\pi=\pi,0,0,\pi$, like XOR gates.
+
+## Why our network fails
+
+Our $\theta$ Network
+
+$$x\rightarrow {\rm Conv(stride=2, num\_feature=4)}$$
+
+​	$$\color{red}\rightarrow{\rm Sum~over~convolution~ axes}$$
+
+​	$$\rightarrow{\rm Linear(4\times1)\rightarrow {\rm output~ as~} \theta}$$
+
+Summation after convolution is what matters! Because $W\sigma_i =-W\sigma_{i+2}$, outputs will cancel each other if added directly!
+
+Instead of putting a non-linear function layer after convolution, or training XOR gates, can we use product of neighbor bits as inputs? like $x_1x_2, x_2x_3,\ldots,x_{n-1}x_n,x_nx_1$. Which is supposed easier to train in large $J_2$ limit.
