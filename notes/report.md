@@ -192,13 +192,41 @@ When we shift the spin configuration for 1-site, the sign changes according to M
 However, for real Hamiltonian, $T_1|\Psi\rangle=\pm|\Psi\rangle$. In Heisenberg model, $-1$ corresponds to $2\times odd$ number of spins.
 
 ## r-theta version Stochastic Reconfiguration
-To get the time evolution of parameters, we start from the Lagrangian
+To get the imaginary time evolution of parameters, we start from the Lagrangian
 
-$L=\left[\frac{i}{2}(\langle\dot{\psi(\alpha,\beta)}|\psi(\alpha,\beta)\rangle-\langle\psi(\alpha,\beta)|\dot{\psi(\alpha,\beta)}\rangle)-\langle\psi(\alpha,\beta)|H|\psi(\alpha,\beta)\rangle\right]/\langle\psi(\alpha,\beta)|\psi(\alpha,\beta)\rangle$
+$$L=\left[\frac{i}{2}(\langle\dot{\psi(\alpha)}|\psi(\alpha)\rangle-\langle\psi(\alpha)|\dot{\psi(\alpha)}\rangle)-\langle\psi(\alpha)|H|\psi(\alpha)\rangle\right]/\langle\psi(\alpha)|\psi(\alpha)\rangle$$
 
-To achieve minimum action, we apply Euler-Lagrangian formula $\frac{\partial L}{\partial \alpha}-\frac{d}{dt}(\frac{\partial L}{\partial \dot{\alpha}})$, 
+Here, $\alpha$ is a set of real parameters.
 
+To achieve minimum action, we apply Euler-Lagrangian formula $\frac{\partial L}{\partial \alpha}-\frac{d}{dt}(\frac{\partial L}{\partial \dot{\alpha}})=0$.
 
+$$\begin{align}\frac{\partial L}{\partial\alpha_i}=&\left[\frac{i}{2}(\langle\psi(\alpha)|\frac{\partial}{\partial\alpha_i}^\dagger\sum_j\dot{\alpha_j}\frac{\partial}{\partial\alpha_j}^\dagger+\sum_j\dot{\alpha_j}\frac{\partial}{\partial\alpha_j}^\dagger\frac{\partial}{\partial\alpha_i}|\psi(\alpha)\rangle-\langle\psi(\alpha)|\frac{\partial}{\alpha_i}^\dagger\sum_j\dot{a_j}\frac{\partial}{\partial a_j}+\sum_j\dot{a_j}\frac{\partial}{\partial a_j}\frac{\partial}{\partial\alpha_i}|\psi(\alpha)\rangle)\\-\langle\psi(\alpha)|\frac{\partial}{\partial \alpha_i}^\dagger H+H\frac{\partial}{\partial \alpha_i}|\psi(\alpha)\rangle\right]/N\\&-\left[\frac{i}{2}(\langle\psi(\alpha)|\sum_j\dot{\alpha_j}\frac{\partial}{\partial\alpha_j}^\dagger|\psi(\alpha)\rangle-\langle\psi(\alpha)|\sum_j\dot{\alpha_j}\frac{\partial}{\partial\alpha_j}|\psi(\alpha)\rangle)-\langle\psi(\alpha)|H|\psi(\alpha)\rangle\right]\langle\psi(\alpha)|\frac{\partial}{\partial \alpha_i}+\frac{\partial}{\partial \alpha_i}^\dagger|\psi(\alpha)\rangle/N^2\end{align}$$
+
+Here, $N=\langle\psi(\alpha)|\psi(\alpha)\rangle$.
+
+Notice $\partial_i,\partial_j$ (shorthand for $\frac{\partial}{\partial \alpha_{i,j}}$) are diagonal in $x$ basis ( ? ), they commute with each other.
+
+$$\begin{align}\frac{\partial L}{\partial \alpha_i}=&\langle(\partial_i+\partial_i^\dagger)\left[-\frac{i}{2}\sum_j\dot{\alpha_j}(\partial_j-\partial_j^\dagger)\right]\rangle-\langle\partial_i^\dagger H+H\partial_i\rangle+\left[\frac{i}{2}\langle\sum_j\dot{\alpha_j}(\partial_j-\partial_j^\dagger)\rangle+\langle H\rangle\right]\langle\partial_i+\partial_i^\dagger\rangle\\=&2\langle\Re(\partial_i)\sum_j\dot{\alpha_j}\Im(\partial_j)\rangle-2\sum_j\dot{\alpha_j}\langle\Im(\partial_j)\rangle\langle\Re(\partial_i)\rangle-2\Re(\langle\partial_i^\dagger H\rangle-\langle\partial^\dagger\rangle\langle H\rangle )\end{align}$$
+
+On the other side,
+
+$$\begin{align}\frac{d}{dt}(\frac{\partial L}{\partial \dot{\alpha_i}})=&-\frac{i}{2}\left[\langle\psi(\alpha)|\sum_j\dot{\alpha_j}\partial_j^\dagger(\partial_i-\partial_i^\dagger)+(\partial_i-\partial_i^\dagger)\sum_j\dot{\alpha_j}\partial_j|\psi(\alpha)\rangle\right]/N\\&-\langle\psi(\alpha)|-\frac{i}{2}(\partial_i-\partial_i^\dagger)|\psi(\alpha)\rangle\langle\psi(\alpha)|\sum_j\dot{\alpha_j}(\partial_j+\partial_j^\dagger)|\psi(\alpha)\rangle/N^2\\=&2\sum_j\dot{\alpha_j}\langle\Re(\partial_j)\Im(\partial_i)\rangle-2\sum_j\dot{\alpha_j}\langle\Re(\partial_j)\rangle\langle\Im(\partial_i)\rangle\end{align}$$
+
+To make it clear, we define matrix $S_{i,j}=\Im(\langle:\partial_i^\dagger\partial_j:\rangle$ and vectors $F_i=\Re(\langle:\partial_i^\dagger H:\rangle)$,  $g_i=\dot{\alpha_i}$. When we take the extreme, we will have
+
+$$S\cdot g-F=0$$
+
+obviously $g=S^{-1}F$ is real during real time evolution.
+
+What about imaginary time evolution?
+
+We have our new Lagrangian
+
+$$L=\left[\frac{1}{2}(\langle\psi(\alpha)|\frac{d}{d\tau}^\dagger+\frac{d}{d\tau}|\psi(\alpha)\rangle-\langle\psi(\alpha)|H|\psi(\alpha)\rangle\right]/\langle\psi(\alpha)|\psi(\alpha)\rangle$$
+
+Then derivatives canceled ??????????????????????????????????????????
+
+## Naive version
 
 $$S(\alpha,\alpha')\equiv\langle\Delta^{\alpha\dagger}_{loc}\Delta^{\alpha'}_{loc}\rangle-\langle\Delta_{loc}^{\alpha\dagger}\rangle\langle\Delta_{loc}^{\alpha'}\rangle$$
 
