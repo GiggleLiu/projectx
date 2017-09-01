@@ -1,0 +1,19 @@
+# required
+numpy
+scipy
+matplotlib
+pygraphviz
+jinja2
+
+# private
+# poornn
+# qstate
+
+# optional
+pygraphviz
+mpi4py
+mkl-service
+profilehooks 
+
+yaml
+fire

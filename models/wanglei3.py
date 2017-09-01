@@ -47,7 +47,7 @@ class WangLei3(StateNN):
                     bias=eta*typed_randn(self.dtype, (num_features[0],)), boundary='P', strides=(stride,)*D)
             self.add_layer(functions.Reshape, output_shape=(num_features[0], imgsize/stride**D))
 
-            self.add_layer(functions.ReLU)
+            self.add_layer(functions.Power,order=3)
             self.add_layer(functions.Sum, axis=-1)
         if version=='const-linear': 
             self.add_layer(Linear, weight=np.array([[-1,-1,1,1]],dtype=dtype, order='F'),

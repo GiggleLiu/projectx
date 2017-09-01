@@ -24,6 +24,7 @@ JgLiu:
 - [ ] test $2D $ $J_1-J_2$ model
 - [ ] representation power of $\theta$ network
 - [ ] note: networks.
+- [ ] bentchmark 40 sites, $J_2= 0.8, E_G =-17.???$, $J_2=0, E_G=$,$J_2=0.25, E_G=-16.???$
 
 Roger:
 

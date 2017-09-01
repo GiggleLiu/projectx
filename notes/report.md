@@ -332,3 +332,12 @@ $$x\rightarrow {\rm Conv(stride=2, num\_feature=4)}$$
 Summation after convolution is what matters! Because $W\sigma_i =-W\sigma_{i+2}$, outputs will cancel each other if added directly!
 
 Instead of putting a non-linear function layer after convolution, or training XOR gates, can we use product of neighbor bits as inputs? like $x_1x_2, x_2x_3,\ldots,x_{n-1}x_n,x_nx_1$. Which is supposed easier to train in large $J_2$ limit.
+
+
+
+# Day 1 Sep
+
+Our New Network
+
+![prodnn](./WangLei3.png)
+

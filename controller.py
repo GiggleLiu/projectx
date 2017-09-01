@@ -604,17 +604,20 @@ def run_rtheta_mlp_exp(J2, nsite, mlp_shape):
     np.savetxt('data/rtheta-mlp-exp-%sel-%s%s.dat'%(number, h.nsite,'p' if h.periodic else 'o'),el,fmt='%.10f%+.10fj')
     #pdb.set_trace()
 
-def run_wanglei3(J2, nsite, momentum=0.):
+def run_wanglei3(J2, nsite, momentum=0., do_plot_wf = True, compare_to_exact = True):
+
     from models.wanglei3 import WangLei3
     # definition of a problem
     h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
     rbm = WangLei3(input_shape=(h.nsite,),num_features=[16], version='conv', dtype='complex128')
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method='adam', step_rate=3e-3, sr_layerwise=False)
+
+    # visualize network
+    from poornn import viznn
+    viznn(rbm, filename='data/%s.pdf'%rbm.__class__.__name__)
+
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method='adam', step_rate=1e-2, sr_layerwise=False)
     sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
     vmc.inverse_rate = 0.05
-
-    do_plot_wf = True
-    compare_to_exact = True
 
     # setup canvas
     if do_plot_wf:
