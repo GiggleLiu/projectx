@@ -13,9 +13,8 @@ def run_rtheta_toy(J2, nsite, version, rtheta_training_ratio, momentum=0.):
     from models.toythnn import ToyTHNN
     h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
     if version=='2l':
-        from models.psnn import PSNN
-        thnn = PSNN((nsite,), nf=16, batch_wise=False, period=2, output_mode='theta', use_msr=False)
-        pdb.set_trace()
+        from models.psnn_leo import PSNN
+        thnn = PSNN((nsite,), nf=16, batch_wise=False, period=2, output_mode='theta')
     elif version=='1l':
         from qstate.classifier import PSNN
         thnn = PSNN((nsite,), batch_wise=False, period=2, output_mode='theta', use_msr=False)
@@ -135,7 +134,7 @@ def run_rtheta(J2, nsite, rtheta_training_ratio, momentum=0.):
 
     # Exact Results
     if compare_to_exact or compare_wf:
-        H, e0, v0, configs = analyse_exact(h, do_printsign=False)
+        H, e0, v0, configs = analyse_exact(h, do_printsign=False, num_eng=10)
 
     el=[] # to store energy
     vv_pre = None
@@ -376,11 +375,13 @@ def run_rtheta_switch(J2, nsite, rtheta_training_ratio, switch_step, momentum=0.
         do_plot_wf=True, compare_to_exact=True, do_check_sample=False):
     from models.wanglei2 import WangLei2
     # definition of a problem
-    h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
+    h = load_hamiltonian('J1J2', size=(nsite,), J1=1.,J2=J2)
     rbm = WangLei2(input_shape=(h.nsite,),num_feature_hidden=4, use_msr=False, theta_period=2, with_linear=False, dtype='float64')
+    #rbm.thnn = get_exact_thnn4(fixed_var=True)
     problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='gd', step_rate=3e-3)
     sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
     optimizer.momentum=momentum
+    vmc.inverse_rate = 0.05
 
     # setup canvas
     if do_plot_wf or do_check_sample:
@@ -498,8 +499,7 @@ def run_target_sign(J2, nsite):
     np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
     pdb.set_trace()
 
-
-def get_exact_thnn4():
+def get_exact_thnn4(fixed_var=True):
     '''
     Number of site = 4.
     expect outputs
@@ -515,19 +515,27 @@ def get_exact_thnn4():
     outputs = np.array([np.pi,0,0,np.pi])
     # we construct the following convolution as the first layer.
     # in order to get an XOR gate.
-    W0 = np.array([[1,0,0,0],    #copy first bit
-            [0,1,0,0],  #copy second bit
-            [1,1,0,0],  #add first two bits
+    W0 = np.array([[1,1,0,0],  #add first two bits
             [1,-1,0,0]]).T #subtract first two bits.
-    b0 = np.array([1,-1,2,-2])
-    y1 = inputs.dot(W0) + inputs.dot(np.roll(W0,2,axis=0)) + b0
+    b0 = np.array([0,0])
+    y1a = inputs.dot(W0) + b0
+    y1b = inputs.dot(np.roll(W0,2,axis=0)) + b0
+    y1 = y1a**2+y1b**2
+    #y1 = np.log(2*np.cosh(inputs.dot(W0) + b0)) + np.log(2*np.cosh(inputs.dot(np.roll(W0,2,axis=0)) + b0))
 
     # we wish outputs == y1.dot(W1)
-    print y1
-    W1 = np.linalg.solve(y1,outputs)
-    print W1
-    pdb.set_trace()
-    return var_conv, var_linear
+    print('Solving %sx = %s'%(y1,outputs))
+    W1 = np.linalg.solve(y1[:2],outputs[:2])
+    print('Get %s'%W1)
+
+    # construct THNN
+    from models.psnn_leo import PSNN
+    thnn = PSNN((4,), nf=2, batch_wise=False, period=2, output_mode='theta')
+    thnn.set_variables(np.concatenate([W0.T.ravel(order='F'), b0,W1.T.ravel(order='F')]))
+    if fixed_var:
+        thnn.layers[1].var_mask=(0,0)
+        thnn.layers[-2].var_mask=(0,0)
+    return thnn
 
 def run_rtheta_mlp_exp(J2, nsite, mlp_shape):
     from models.rtheta_mlp_exp import RTheta_MLP_EXP
@@ -548,6 +556,17 @@ def run_rtheta_mlp_exp(J2, nsite, mlp_shape):
     #     plt.ion()
     #     fig=plt.figure(figsize=(10,5))
 
+    # Exact Results
+    if compare_to_exact or compare_wf:
+        H, e0, v0, configs = analyse_exact(h, do_printsign=False)
+
+    el=[] # to store energy
+    vv_pre = None
+    print '\nRunning 0-th Iteration.'
+    for info in optimizer:
+        # `sampels` and `opq_vals` are cached!
+        ei = problem.cache['opq_vals'][0]  
+ 
         # if do_plot_wf:
         #     # vv = rbm.tovec(mag=h.mag)
         #     amp = []
@@ -584,3 +603,64 @@ def run_rtheta_mlp_exp(J2, nsite, mlp_shape):
         number += '-'
     np.savetxt('data/rtheta-mlp-exp-%sel-%s%s.dat'%(number, h.nsite,'p' if h.periodic else 'o'),el,fmt='%.10f%+.10fj')
     #pdb.set_trace()
+
+def run_wanglei3(J2, nsite, momentum=0.):
+    from models.wanglei3 import WangLei3
+    # definition of a problem
+    h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
+    rbm = WangLei3(input_shape=(h.nsite,),num_features=[16], version='conv', dtype='complex128')
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method='adam', step_rate=3e-3, sr_layerwise=False)
+    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    vmc.inverse_rate = 0.05
+
+    do_plot_wf = True
+    compare_to_exact = True
+
+    # setup canvas
+    if do_plot_wf:
+        plt.ion()
+        fig=plt.figure(figsize=(10,5))
+
+    # Exact Results
+    if compare_to_exact or compare_wf:
+        H, e0, v0, configs = analyse_exact(h, do_printsign=False)
+
+    el=[] # to store energy
+    vv_pre = None
+    print '\nRunning 0-th Iteration.'
+    for info in optimizer:
+        # `sampels` and `opq_vals` are cached!
+        ei = problem.cache['opq_vals'][0]  
+
+        if do_plot_wf:
+            vv = rbm.tovec(mag=h.mag)
+            vv = vv/np.linalg.norm(vv)
+
+            fig.clear()
+            plt.subplot(121)
+            compare_wf(vv, v0)
+            plt.subplot(122)
+            scatter_vec_phase(vv, vv_pre)
+            D=0.8
+            plt.xlim(-D,D)
+            plt.ylim(-D,D)
+            plt.pause(0.01)
+            vv_pre = vv
+
+        if compare_to_exact:
+            err=abs(e0-ei)/(abs(e0)+abs(ei))*2
+            print('E/site = %s (%s), Error = %.4f%%'%(ei/h.nsite,e0/h.nsite,err*100))
+        else:
+            print('E/site = %s'%(ei/h.nsite,))
+        el.append(ei)
+
+        num_iter = info['n_iter']
+        #optimizer.step_rate *= 0.995
+        if num_iter>=1000:
+            break
+        print '\nRunning %s-th Iteration.'%(num_iter+1)
+
+    np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
+    pdb.set_trace()
+
+

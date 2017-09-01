@@ -8,7 +8,7 @@ import pdb
 from poornn.utils import typed_randn
 from poornn import SPConv, Linear, functions
 #from qstate.classifier import PSNN
-from psnn import PSNN
+from psnn_leo import PSNN, psnn_msr
 from qstate import StateNN
 
 __all__=['WangLei2']
@@ -46,7 +46,10 @@ class WangLei2(StateNN):
 
         if use_msr and theta_period!=2:
             raise ValueError()
-        self.thnn = PSNN(input_shape, period=theta_period, batch_wise=False, output_mode='theta', use_msr=use_msr)
+        if use_msr:
+            self.thnn = psnn_msr(nsite=input_shape[0])
+        else:
+            self.thnn = PSNN(input_shape, period=theta_period, batch_wise=False, output_mode='theta')
 
     def get_sign(self, config, return_thys=False ,**kwargs):
         '''Get sign using sign network.'''
