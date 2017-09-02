@@ -42,7 +42,7 @@ def run_rtheta_toy(J2, nsite, version, rtheta_training_ratio, momentum=0.):
 
     el=[] # to store energy
     vv_pre = None
-    print '\nRunning 0-th Iteration.'
+    print('\nRunning 0-th Iteration.')
     for info in optimizer:
         # `sampels` and `opq_vals` are cached!
         ei = problem.cache['opq_vals'][0]  
@@ -69,7 +69,7 @@ def run_rtheta_toy(J2, nsite, version, rtheta_training_ratio, momentum=0.):
         if info['n_iter']>=300:
             plt.savefig('data/SIGN-N%s-J2%s-%s.png'%(nsite,J2,version))
             break
-        print '\nRunning %s-th Iteration.'%(info['n_iter']+1)
+        print('\nRunning %s-th Iteration.'%(info['n_iter']+1))
 
     np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
     pdb.set_trace()
@@ -138,7 +138,7 @@ def run_rtheta(J2, nsite, rtheta_training_ratio, momentum=0.):
 
     el=[] # to store energy
     vv_pre = None
-    print '\nRunning 0-th Iteration.'
+    print('\nRunning 0-th Iteration.')
     for info in optimizer:
         # `sampels` and `opq_vals` are cached!
         ei = problem.cache['opq_vals'][0]  
@@ -182,7 +182,7 @@ def run_rtheta(J2, nsite, rtheta_training_ratio, momentum=0.):
 
         if info['n_iter']>=800:
             break
-        print '\nRunning %s-th Iteration.'%(info['n_iter']+1)
+        print('\nRunning %s-th Iteration.'%(info['n_iter']+1))
 
     np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
     pdb.set_trace()
@@ -212,7 +212,7 @@ def run_rtheta_mlp(J2, nsite, mlp_shape):
 
     el=[] # to store energy
     vv_pre = None
-    print '\nRunning 0-th Iteration.'
+    print('\nRunning 0-th Iteration.')
     for info in optimizer:
         # `sampels` and `opq_vals` are cached!
         ei = problem.cache['opq_vals'][0]  
@@ -245,7 +245,7 @@ def run_rtheta_mlp(J2, nsite, mlp_shape):
 
         if info['n_iter']>=1:
             break
-        print '\nRunning %s-th Iteration.'%(info['n_iter']+1)
+        print('\nRunning %s-th Iteration.'%(info['n_iter']+1))
 
     number = ''
     for i in mlp_shape:
@@ -277,7 +277,7 @@ def run_wanglei(J2, nsite):
 
     el=[] # to store energy
     vv_pre = None
-    print '\nRunning 0-th Iteration.'
+    print('\nRunning 0-th Iteration.')
     for info in optimizer:
         # `sampels` and `opq_vals` are cached!
         ei = problem.cache['opq_vals'][0]  
@@ -307,7 +307,7 @@ def run_wanglei(J2, nsite):
         #optimizer.step_rate *= 0.995
         if num_iter>=200:
             break
-        print '\nRunning %s-th Iteration.'%(num_iter+1)
+        print('\nRunning %s-th Iteration.'%(num_iter+1))
 
     np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
     pdb.set_trace()
@@ -336,7 +336,7 @@ def rbm_given_sign(J2, nsite):
 
     el=[] # to store energy
     vv_pre = None
-    print '\nRunning 0-th Iteration.'
+    print('\nRunning 0-th Iteration.')
     for info in optimizer:
         # `sampels` and `opq_vals` are cached!
         ei = problem.cache['opq_vals'][0]  
@@ -366,7 +366,7 @@ def rbm_given_sign(J2, nsite):
         #optimizer.step_rate *= 0.995
         if num_iter>=2000:
             break
-        print '\nRunning %s-th Iteration.'%(num_iter+1)
+        print('\nRunning %s-th Iteration.'%(num_iter+1))
 
     np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
     pdb.set_trace()
@@ -394,7 +394,7 @@ def run_rtheta_switch(J2, nsite, rtheta_training_ratio, switch_step, momentum=0.
 
     el=[] # to store energy
     vv_pre = None
-    print '\nRunning 0-th Iteration.'
+    print('\nRunning 0-th Iteration.')
     sr.rtheta_training_ratio = [rtheta_training_ratio[0], 0]
     for info in optimizer:
         # `sampels` and `opq_vals` are cached!
@@ -439,10 +439,10 @@ def run_rtheta_switch(J2, nsite, rtheta_training_ratio, switch_step, momentum=0.
         if k>=800:
             break
         if k%(2*switch_step)<switch_step:
-            print '\nRunning %s-th Iteration (optimize amplitudes).'%(k+1)
+            print('\nRunning %s-th Iteration (optimize amplitudes).'%(k+1))
             sr.rtheta_training_ratio = [rtheta_training_ratio[0], 0]
         else:
-            print '\nRunning %s-th Iteration (optimize signs).'%(k+1)
+            print('\nRunning %s-th Iteration (optimize signs).'%(k+1))
             sr.rtheta_training_ratio = [0, rtheta_training_ratio[1]]
 
     np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
@@ -472,7 +472,7 @@ def run_target_sign(J2, nsite):
 
     el=[] # to store energy
     vv_pre = None
-    print '\nRunning 0-th Iteration.'
+    print('\nRunning 0-th Iteration.')
     for info in optimizer:
         # `sampels` and `opq_vals` are cached!
         ei = problem.cache['opq_vals'][0]  
@@ -494,7 +494,7 @@ def run_target_sign(J2, nsite):
         #optimizer.step_rate *= 0.995
         if num_iter>=200:
             break
-        print '\nRunning %s-th Iteration.'%(num_iter+1)
+        print('\nRunning %s-th Iteration.'%(num_iter+1))
 
     np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
     pdb.set_trace()
@@ -562,7 +562,7 @@ def run_rtheta_mlp_exp(J2, nsite, mlp_shape):
 
     el=[] # to store energy
     vv_pre = None
-    print '\nRunning 0-th Iteration.'
+    print('\nRunning 0-th Iteration.')
     for info in optimizer:
         # `sampels` and `opq_vals` are cached!
         ei = problem.cache['opq_vals'][0]  
@@ -595,7 +595,7 @@ def run_rtheta_mlp_exp(J2, nsite, mlp_shape):
 
         if info['n_iter']>=1000:
             break
-        print '\nRunning %s-th Iteration.'%(info['n_iter']+1)
+        print('\nRunning %s-th Iteration.'%(info['n_iter']+1))
 
     number = ''
     for i in mlp_shape:
@@ -630,7 +630,7 @@ def run_wanglei3(J2, size, optimize_method='adam', momentum=0., do_plot_wf = Tru
 
     el=[] # to store energy
     vv_pre = None
-    print '\nRunning 0-th Iteration.'
+    print('\nRunning 0-th Iteration.')
     for info in optimizer:
         # `sampels` and `opq_vals` are cached!
         ei = problem.cache['opq_vals'][0]  
@@ -661,7 +661,7 @@ def run_wanglei3(J2, size, optimize_method='adam', momentum=0., do_plot_wf = Tru
         #optimizer.step_rate *= 0.995
         if num_iter>=1000:
             break
-        print '\nRunning %s-th Iteration.'%(num_iter+1)
+        print('\nRunning %s-th Iteration.'%(num_iter+1))
 
     np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
     pdb.set_trace()
@@ -693,7 +693,7 @@ def run_wanglei4(J2, size, optimize_method='adam', momentum=0., do_plot_wf = Tru
 
     el=[] # to store energy
     vv_pre = None
-    print '\nRunning 0-th Iteration.'
+    print('\nRunning 0-th Iteration.')
     for info in optimizer:
         # `sampels` and `opq_vals` are cached!
         ei = problem.cache['opq_vals'][0]  
@@ -724,7 +724,25 @@ def run_wanglei4(J2, size, optimize_method='adam', momentum=0., do_plot_wf = Tru
         #optimizer.step_rate *= 0.995
         if num_iter>=1000:
             break
-        print '\nRunning %s-th Iteration.'%(num_iter+1)
+        print('\nRunning %s-th Iteration.'%(num_iter+1))
 
     np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
     pdb.set_trace()
+
+def show_el44(window=None):
+    datafile = 'data/el44-J20.8.dat'
+    EG=-0.627335103992*16
+    # prepair data
+    el=np.loadtxt(datafile)
+    steps=np.arange(len(el))
+
+    plt.ion()
+    plt.plot(steps,el, lw=2, color='k')
+    plt.xlabel('Step')
+    plt.ylabel('$E$')
+    plt.xscale('log')
+    if EG is not None: plt.axhline(y=EG, ls='--', color='#666666')
+    if window is not None: plt.ylim(*window)
+    plt.show()
+    pdb.set_trace()
+    plt.savefig('data/ENG44%s-J20.8.png'%('[%s,%s]'%tuple(window) if window is not None else  ''))

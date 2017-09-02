@@ -2,6 +2,7 @@
 Restricted Boltzmann Machine.
 '''
 
+from __future__ import division
 import numpy as np
 import pdb
 
@@ -37,7 +38,7 @@ class WangLei3(StateNN):
             powerlist = [[[1,0],[0,1]],[[0,1],[1,0]],[[1,1]],[[1],[1]]]
             #powerlist = [[[1,0],[0,1]],[[0,1],[1,0]],[[1,1]],[[1],[1]],[[1,0,1]],[[1],[0],[1]],[[1,1,1]]]
         NF = len(powerlist)+1
-        plnn = ParallelNN(input_shape = ishape, output_shape=(1,NF,)+tuple([si/stride for si in ishape[1:]]), dtype=dtype, axis=1)
+        plnn = ParallelNN(input_shape = ishape, output_shape=(1,NF,)+tuple([si//stride for si in ishape[1:]]), dtype=dtype, axis=1)
         plnn.add_layer(functions.Reshape)
         for power in powerlist:
             plnn.add_layer(functions.ConvProd, powers=power, boundary='P', strides=(stride,)*D)
@@ -51,7 +52,7 @@ class WangLei3(StateNN):
             imgsize = self.layers[-1].output_shape[-D:]
             self.add_layer(SPConv, weight=eta*typed_randn(self.dtype, (self.num_features[0], NF)+imgsize),
                     bias=eta*typed_randn(self.dtype, (num_features[0],)), boundary='P', strides=(stride,)*D)
-            self.add_layer(functions.Reshape, output_shape=(num_features[0], np.prod(imgsize)/stride**D))
+            self.add_layer(functions.Reshape, output_shape=(num_features[0], np.prod(imgsize)//stride**D))
 
             self.add_layer(functions.Power,order=3)
             #self.add_layer(functions.Log2cosh)

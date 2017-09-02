@@ -40,7 +40,7 @@ class ExactVMC(object):
             Jz,h=self.h.Jz,self.h.h
             h2=Jz/4.*kron_(sz_,sz_)
             H=0
-            for i in xrange(nsite):
+            for i in range(nsite):
                 if i!=nsite-1:
                     H=H+kron_(kron_(eye_(2**i),h2),eye_(2**(nsite-2-i)))
                 elif periodic: #periodic boundary
@@ -51,7 +51,7 @@ class ExactVMC(object):
             H=0
             for INB,(J,Jz) in enumerate(zip(self.h.Js,self.h.Jzs)):
                 h2=J/4.*(kron_(sx_,kron_(eye_(2**INB),sx_))+kron_(sy_,kron_(eye_(2**INB),sy_)))+Jz/4.*kron_(sz_,kron_(eye_(2**INB),sz_))
-                for i in xrange(nsite-INB-1):
+                for i in range(nsite-INB-1):
                     H=H+kron_(kron_(eye_(2**i),h2),eye_(2**(nsite-2-i-INB)))
 
                 #impose periodic boundary

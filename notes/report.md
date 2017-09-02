@@ -339,8 +339,14 @@ Instead of putting a non-linear function layer after convolution, or training XO
 
 Our New Network that works extremely fine in$N=8,12, J_2=0.8$ network.
 
-![prodnn](./WangLei3.png)
+![wanglei3](./WangLei3.png)
 
 Our new network that works for $4\times4, J_2=0.8$ networks.
 
-![prodnn](./WangLei4.png)
+![wanglei4](./WangLei4.png)
+
+Result, Energy as a function of steps, with $x$ axis in log scale.
+![el44](./ENG44-J20.8.png)
+
+The dashed line is the exact energy. Zoom in, we see it is still going down
+![el44](./ENG44[-10.1,-8]-J20.8.png)

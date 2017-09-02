@@ -2,6 +2,7 @@
 Restricted Boltzmann Machine.
 '''
 
+from __future__ import division
 import numpy as np
 import pdb
 
@@ -44,7 +45,7 @@ class ConvWF(StateNN):
         nf1_ = np.prod(self.layers[-1].output_shape)
         self.add_layer(functions.Reshape, output_shape=(nf1_,))
 
-        self.add_layer(Linear, weight=typed_randn(dtype, (nfs[2], nfs[1]*np.prod([ni/4 for ni in input_shape])))*eta,
+        self.add_layer(Linear, weight=typed_randn(dtype, (nfs[2], nfs[1]*np.prod([ni//4 for ni in input_shape])))*eta,
                 bias=typed_randn(dtype, (nfs[2],))*eta)
         self.add_layer(functions.ReLU)
 

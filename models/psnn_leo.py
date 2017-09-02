@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 import pdb
 
@@ -36,14 +37,14 @@ class PSNN(ThetaNN):
         var_mask=(1,1)
         self.add_layer(SPConv, weight=weight, bias=bias, strides=(period,), boundary='P', var_mask=var_mask)
         if with_linear:
-            self.add_layer(functions.Reshape, output_shape=(num_batch,nf,nsite/period))
+            self.add_layer(functions.Reshape, output_shape=(num_batch,nf,nsite//period))
             self.add_layer(functions.Power, order=2)
             #self.add_layer(functions.Log2cosh)
             self.add_layer(functions.Sum, axis=-1)
             self.add_layer(Linear, weight=eta*typed_randn(dtype, (1, nf)),
                     bias=0*typed_randn(dtype, (1,)), var_mask=(1,0))
         else:
-            self.add_layer(functions.Reshape, output_shape=(num_batch,nf*nsite/period))
+            self.add_layer(functions.Reshape, output_shape=(num_batch,nf*nsite//period))
             self.add_layer(functions.Sum, axis=-1)
 
         if output_mode != 'theta':

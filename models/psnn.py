@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 import pdb
 
@@ -40,7 +41,7 @@ class PSNN(ThetaNN):
             bias=eta*typed_randn('float64', (nf, ))
             var_mask=(1,1)
         self.add_layer(SPConv, weight=weight, bias=bias, strides=(period,), boundary='P', var_mask=var_mask)
-        self.add_layer(functions.Reshape, output_shape=(num_batch,nf,nsite/period))
+        self.add_layer(functions.Reshape, output_shape=(num_batch,nf,nsite//period))
         #self.add_layer(functions.Cos)
         self.add_layer(functions.Sum, axis=-1)
         self.add_layer(functions.ReLU)

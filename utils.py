@@ -90,7 +90,7 @@ def check_sample(rbm, h, samples):
     v=rbm.tovec(mag=h.mag)
     v=v/np.linalg.norm(v)
     H=h.get_mat(dense=False)
-    print 'ExactVMC E/site = %s'%(v.conj().T.dot(H.dot(v)).item()/nsite)
+    print('ExactVMC E/site = %s'%(v.conj().T.dot(H.dot(v)).item()/nsite))
 
     configs = h.configs
     hndim=len(configs)

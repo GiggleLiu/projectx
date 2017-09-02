@@ -2,6 +2,7 @@
 Restricted Boltzmann Machine.
 '''
 
+from __future__ import division
 import numpy as np
 import pdb
 
@@ -34,7 +35,7 @@ class WangLei(StateNN):
             self.layers.append(functions.Reshape(input_shape, dtype=dtype, output_shape=(1,)+input_shape))
             self.add_layer(SPConv, weight=eta*typed_randn(self.dtype, (self.num_features[0], 1, nsite)),
                     bias=eta*typed_randn(self.dtype, (num_features[0],)), boundary='P', strides=(stride,))
-            self.add_layer(functions.Reshape, output_shape=(num_features[0], nsite/stride))
+            self.add_layer(functions.Reshape, output_shape=(num_features[0], nsite//stride))
         self.add_layer(functions.Log2cosh)
         self.add_layer(functions.Sum, axis=-1)
         self.add_layer(functions.Exp)

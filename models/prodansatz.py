@@ -45,10 +45,6 @@ class ConvWF(ANN):
         nf1_ = np.prod(self.layers[-1].output_shape)
         self.add_layer(functions.Reshape, output_shape=(nf1_,))
 
-        #self.add_layer(Linear, weight=typed_randn(dtype, (nfs[2], nfs[1]*np.prod([ni/4 for ni in input_shape])))*eta,
-                #bias=typed_randn(dtype, (nfs[2],))*eta)
-        #self.add_layer(functions.ReLU)
-
         self.add_layer(Apdot, weight=typed_randn(dtype,(nfs[3],nfs[1]))*eta,bias=typed_randn(dtype, (nfs[3],))*eta)
         self.add_layer(Linear, weight=typed_randn(dtype,(1,nfs[3]))*eta,bias=typed_randn(dtype, (1,))*eta)
 
@@ -94,6 +90,3 @@ class ConvWF(ANN):
         '''
         res=self.forward(config)[-1]
         return res
-
-    #def backward(self, ys):
-        #return super(ConvWF, self).backward(ys)[0]/ys[-1]
