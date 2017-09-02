@@ -604,20 +604,20 @@ def run_rtheta_mlp_exp(J2, nsite, mlp_shape):
     np.savetxt('data/rtheta-mlp-exp-%sel-%s%s.dat'%(number, h.nsite,'p' if h.periodic else 'o'),el,fmt='%.10f%+.10fj')
     #pdb.set_trace()
 
-def run_wanglei3(J2, nsite, momentum=0., do_plot_wf = True, compare_to_exact = True):
-
+def run_wanglei3(J2, size, optimize_method='adam', momentum=0., do_plot_wf = True, compare_to_exact = True, learning_rate=1e-2):
     from models.wanglei3 import WangLei3
     # definition of a problem
-    h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
-    rbm = WangLei3(input_shape=(h.nsite,),num_features=[16], version='conv', dtype='complex128')
+    h = load_hamiltonian('J1J2', size=size, J2=J2)
+    rbm = WangLei3(input_shape=size,num_features=[8], version='conv', dtype='complex128')
 
     # visualize network
     from poornn import viznn
     viznn(rbm, filename='data/%s.pdf'%rbm.__class__.__name__)
 
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method='adam', step_rate=1e-2, sr_layerwise=False)
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method=optimize_method, step_rate=learning_rate, sr_layerwise=False)
     sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
     vmc.inverse_rate = 0.05
+    if momentum!=0: optimizer.momentum=momentum
 
     # setup canvas
     if do_plot_wf:
@@ -667,3 +667,64 @@ def run_wanglei3(J2, nsite, momentum=0., do_plot_wf = True, compare_to_exact = T
     pdb.set_trace()
 
 
+def run_wanglei4(J2, size, optimize_method='adam', momentum=0., do_plot_wf = True, compare_to_exact = True, learning_rate=1e-2):
+    from models.wanglei4 import WangLei4
+    # definition of a problem
+    h = load_hamiltonian('J1J2', size=size, J2=J2)
+    rbm = WangLei4(input_shape=size,NF=8, K=3,num_features=[8], version='conv', dtype='complex128')
+
+    # visualize network
+    from poornn import viznn
+    viznn(rbm, filename='data/%s.png'%rbm.__class__.__name__)
+
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method=optimize_method, step_rate=learning_rate, sr_layerwise=False)
+    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    vmc.inverse_rate = 0.05
+    if momentum!=0: optimizer.momentum=momentum
+
+    # setup canvas
+    if do_plot_wf:
+        plt.ion()
+        fig=plt.figure(figsize=(10,5))
+
+    # Exact Results
+    if compare_to_exact or compare_wf:
+        H, e0, v0, configs = analyse_exact(h, do_printsign=False)
+
+    el=[] # to store energy
+    vv_pre = None
+    print '\nRunning 0-th Iteration.'
+    for info in optimizer:
+        # `sampels` and `opq_vals` are cached!
+        ei = problem.cache['opq_vals'][0]  
+
+        if do_plot_wf:
+            vv = rbm.tovec(mag=h.mag)
+            vv = vv/np.linalg.norm(vv)
+
+            fig.clear()
+            plt.subplot(121)
+            compare_wf(vv, v0)
+            plt.subplot(122)
+            scatter_vec_phase(vv, vv_pre)
+            D=0.8
+            plt.xlim(-D,D)
+            plt.ylim(-D,D)
+            plt.pause(0.01)
+            vv_pre = vv
+
+        if compare_to_exact:
+            err=abs(e0-ei)/(abs(e0)+abs(ei))*2
+            print('E/site = %s (%s), Error = %.4f%%'%(ei/h.nsite,e0/h.nsite,err*100))
+        else:
+            print('E/site = %s'%(ei/h.nsite,))
+        el.append(ei)
+
+        num_iter = info['n_iter']
+        #optimizer.step_rate *= 0.995
+        if num_iter>=1000:
+            break
+        print '\nRunning %s-th Iteration.'%(num_iter+1)
+
+    np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
+    pdb.set_trace()

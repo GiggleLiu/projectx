@@ -93,15 +93,17 @@ def load_hamiltonian(model, size, periodic=True, **kwargs):
     J2z=kwargs.get('J2z',J2)
     h=kwargs.get('h',0)
     if model=='AFH':
-        h=hamiltonians.HeisenbergH(nsite=size[0],J1=J1,J1z=J1z,periodic=periodic, mag=0)
+        if len(size)==1:
+            h=hamiltonians.HeisenbergH(nsite=size[0],J1=J1,J1z=J1z,periodic=periodic, mag=0)
+        else:
+            h=hamiltonians.HeisenbergH2D(size[0], size[1],J1=J1,J1z=J1z,periodic=periodic, mag=0)
     elif model=='J1J2':
-        h=hamiltonians.HeisenbergH(nsite=size[0],J1=J1,J1z=J1z,J2=J2,J2z=J2,periodic=periodic, mag=0)
+        if len(size)==1:
+            h=hamiltonians.HeisenbergH(nsite=size[0],J1=J1,J1z=J1z,J2=J2,J2z=J2,periodic=periodic, mag=0)
+        else:
+            h=hamiltonians.HeisenbergH2D(size[0], size[1],J1=J1,J1z=J1z,J2=J2,J2z=J2z,periodic=periodic, mag=0)
     elif model=='TFI':
         h=hamiltonians.TFI(nsite=size[0],Jz=J1z,h=h,periodic=periodic, mag=None)
-    elif model=='AFH2D':
-        h=hamiltonians.HeisenbergH2D(size[0], size[1],J1=J1,J1z=J1z,periodic=periodic, mag=0)
-    elif model=='J1J22D':
-        h=hamiltonians.HeisenbergH2D(size[0], size[1],J1=J1,J1z=J1z,J2=J2,J2z=J2z,periodic=periodic, mag=0)
     else:
         raise ValueError()
     return h

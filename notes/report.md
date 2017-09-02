@@ -337,7 +337,10 @@ Instead of putting a non-linear function layer after convolution, or training XO
 
 # Day 1 Sep
 
-Our New Network
+Our New Network that works extremely fine in$N=8,12, J_2=0.8$ network.
 
 ![prodnn](./WangLei3.png)
 
+Our new network that works for $4\times4, J_2=0.8$ networks.
+
+![prodnn](./WangLei4.png)
