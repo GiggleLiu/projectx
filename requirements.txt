@@ -4,6 +4,7 @@ scipy
 matplotlib
 pygraphviz
 jinja2
+ConfigObj
 
 # private
 # poornn

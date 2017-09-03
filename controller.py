@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.sparse as sps
 from profilehooks import profile
-import pdb
+import pdb, os
 
-from problems import ModelProbDef, load_hamiltonian
+from problems import ModelProbDef, load_hamiltonian, get_optimizer, load_config, pconfig
 from utils import scatter_vec_phase, compare_wf, analyse_exact, check_sample, sign_func_from_vec
 from qstate.sampler import get_ground_toynn
 
@@ -23,10 +23,12 @@ def run_rtheta_toy(J2, nsite, version, rtheta_training_ratio, momentum=0.):
     # definition of a problem
     H = h.get_mat()
     rbm = get_ground_toynn(h, thnn=thnn, train_amp=True, theta_period=2)
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', sr_layerwise=False if version=='toy' else True, optimize_method='gd', step_rate=3e-3)
-    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', sr_layerwise=False if version=='toy' else True)
+    sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     sr.rtheta_training_ratio = rtheta_training_ratio
-    optimizer.momentum=momentum
+
+    optimizer = get_optimizer(wrt=rbm.get_variables(), fprime=problem.compute_gradient,
+            optimize_method='gd', step_rate=3e-3, momentum=momentum)
 
     do_plot_wf = True
     compare_to_exact = True
@@ -118,10 +120,12 @@ def run_rtheta(J2, nsite, rtheta_training_ratio, momentum=0.):
     # definition of a problem
     h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
     rbm = WangLei2(input_shape=(h.nsite,),num_feature_hidden=4, use_msr=False, theta_period=2, with_linear=False, dtype='float64')
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='gd', step_rate=1e-2)
-    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd')
+    sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     sr.rtheta_training_ratio = rtheta_training_ratio
-    optimizer.momentum=momentum
+
+    optimizer = get_optimizer(wrt=rbm.get_variables(), fprime=problem.compute_gradient,
+            optimize_method='gd', step_rate=1e-2, momentum=momentum)
 
     do_plot_wf = True
     compare_to_exact = True
@@ -194,9 +198,12 @@ def run_rtheta_mlp(J2, nsite, mlp_shape):
     rbm = RTheta_MLP(input_shape=(h.nsite,),num_feature_hidden=4, mlp_shape=mlp_shape, use_msr=False, theta_period=2)
     #rbm = get_ground_toynn(h, mode='r-theta', train_amp=False, theta_period=nsite)
     #pdb.set_trace()
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='adam', step_rate=3e-3)
-    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd')
+    sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     sr.rtheta_training_ratio = [1.,30.]
+
+    optimizer = get_optimizer(wrt=rbm.get_variables(), fprime=problem.compute_gradient,
+            optimize_method='adam', step_rate=3e-3, momentum=momentum)
 
     # do_plot_wf = True
     compare_to_exact = True
@@ -259,9 +266,12 @@ def run_wanglei(J2, nsite):
     # definition of a problem
     h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
     rbm = WangLei(input_shape=(h.nsite,),num_features=[16, 64, 16], version='linear', use_conv=True, dtype='complex128')
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method='gd', step_rate=1e-1, sr_layerwise=True)
-    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', sr_layerwise=True)
+    sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     vmc.inverse_rate = 0.05
+
+    optimizer = get_optimizer(wrt=rbm.get_variables(), fprime=problem.compute_gradient,
+            optimize_method='gd', step_rate=1e-1, momentum=momentum)
 
     do_plot_wf = True
     compare_to_exact = True
@@ -324,9 +334,12 @@ def rbm_given_sign(J2, nsite):
         H, e0, v0, configs = analyse_exact(h, do_printsign=False)
 
     rbm = RBM(input_shape=(h.nsite,),num_feature_hidden=4, dtype='float64', sign_func = sign_func_from_vec(h.configs, v0))
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method='gd', step_rate=3e-2, sr_layerwise=False)
-    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', sr_layerwise=False)
+    sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     vmc.inverse_rate = 0.05
+
+    optimizer = get_optimizer(wrt=rbm.get_variables(), fprime=problem.compute_gradient,
+            optimize_method='gd', step_rate=3e-2, momentum=momentum)
 
     # setup canvas
     if do_plot_wf:
@@ -378,10 +391,12 @@ def run_rtheta_switch(J2, nsite, rtheta_training_ratio, switch_step, momentum=0.
     h = load_hamiltonian('J1J2', size=(nsite,), J1=1.,J2=J2)
     rbm = WangLei2(input_shape=(h.nsite,),num_feature_hidden=4, use_msr=False, theta_period=2, with_linear=False, dtype='float64')
     #rbm.thnn = get_exact_thnn4(fixed_var=True)
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='gd', step_rate=3e-3)
-    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
-    optimizer.momentum=momentum
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd')
+    sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     vmc.inverse_rate = 0.05
+
+    optimizer = get_optimizer(wrt=rbm.get_variables(), fprime=problem.compute_gradient,
+            optimize_method='gd', step_rate=3e-3, momentum=momentum)
 
     # setup canvas
     if do_plot_wf or do_check_sample:
@@ -454,9 +469,12 @@ def run_target_sign(J2, nsite):
     # definition of a problem
     h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
     rbm = WangLei(input_shape=(h.nsite,), version='linear', use_conv=True, dtype='complex128')
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method='gd', step_rate=1e-1, sr_layerwise=True)
-    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', sr_layerwise=True)
+    sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     vmc.inverse_rate = 0.05
+
+    optimizer = get_optimizer(wrt=rbm.get_variables(), fprime=problem.compute_gradient,
+            optimize_method='gd', step_rate=1e-1, momentum=momentum)
 
     do_plot_wf = True
     compare_to_exact = True
@@ -544,9 +562,12 @@ def run_rtheta_mlp_exp(J2, nsite, mlp_shape):
     rbm = RTheta_MLP_EXP(input_shape=(h.nsite,),num_feature_hidden=4, mlp_shape=mlp_shape, use_msr=False, theta_period=2)
     #rbm = get_ground_toynn(h, mode='r-theta', train_amp=False, theta_period=nsite)
     #pdb.set_trace()
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd', optimize_method='adam', step_rate=3e-3)
-    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd')
+    sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     sr.rtheta_training_ratio = 30
+
+    optimizer = get_optimizer(wrt=rbm.get_variables(), fprime=problem.compute_gradient,
+            optimize_method='adam', step_rate=3e-3, momentum=momentum)
 
     # do_plot_wf = True
     compare_to_exact = True
@@ -614,10 +635,12 @@ def run_wanglei3(J2, size, optimize_method='adam', momentum=0., do_plot_wf = Tru
     from poornn import viznn
     viznn(rbm, filename='data/%s.pdf'%rbm.__class__.__name__)
 
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method=optimize_method, step_rate=learning_rate, sr_layerwise=False)
-    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', sr_layerwise=False)
+    sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     vmc.inverse_rate = 0.05
-    if momentum!=0: optimizer.momentum=momentum
+
+    optimizer = get_optimizer(wrt=rbm.get_variables(), fprime=problem.compute_gradient,
+            optimize_method=optimize_method, step_rate=learning_rate, momentum=momentum)
 
     # setup canvas
     if do_plot_wf:
@@ -677,10 +700,13 @@ def run_wanglei4(J2, size, optimize_method='adam', momentum=0., do_plot_wf = Tru
     from poornn import viznn
     viznn(rbm, filename='data/%s.png'%rbm.__class__.__name__)
 
-    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', optimize_method=optimize_method, step_rate=learning_rate, sr_layerwise=False)
-    sr, rbm, optimizer, vmc = problem.sr, problem.rbm, problem.optimizer, problem.vmc
+    problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', sr_layerwise=False)
+    sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     vmc.inverse_rate = 0.05
-    if momentum!=0: optimizer.momentum=momentum
+
+    optimizer = get_optimizer(wrt=rbm.get_variables(), fprime=problem.compute_gradient,
+            optimize_method=optimize_method, step_rate=learning_rate, momentum=momentum)
+
 
     # setup canvas
     if do_plot_wf:
@@ -727,6 +753,86 @@ def run_wanglei4(J2, size, optimize_method='adam', momentum=0., do_plot_wf = Tru
         print('\nRunning %s-th Iteration.'%(num_iter+1))
 
     np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
+    pdb.set_trace()
+
+def show_el44(window=None):
+    datafile = 'data/el44-J20.8.dat'
+    EG=-0.627335103992*16
+    # prepair data
+    el=np.loadtxt(datafile)
+    steps=np.arange(len(el))
+
+    plt.ion()
+    plt.plot(steps,el, lw=2, color='k')
+    plt.xlabel('Step')
+    plt.ylabel('$E$')
+    plt.xscale('log')
+    if EG is not None: plt.axhline(y=EG, ls='--', color='#666666')
+    if window is not None: plt.ylim(*window)
+    plt.show()
+    pdb.set_trace()
+    plt.savefig('data/ENG44%s-J20.8.png'%('[%s,%s]'%tuple(window) if window is not None else  ''))
+
+def run_bentchmark(configfile, do_plot_wf = True, compare_to_exact = True):
+    folder = os.path.dirname(configfile)
+    config = load_config(configfile)
+
+    # definition of a neural network
+    from models.wanglei4 import WangLei4
+    rbm = WangLei4(input_shape=tuple(config['hamiltonian']['size']), NF=8, K=3,num_features=[8], version='conv', dtype='complex128')
+
+    # visualize network
+    from poornn import viznn
+    viznn(rbm, filename=folder+'/%s.png'%rbm.__class__.__name__)
+
+    optimizer, problem = pconfig(config, rbm)
+    h, sr, rbm, vmc = problem.hamiltonian, problem.sr, problem.rbm, problem.vmc
+
+    # setup canvas
+    if do_plot_wf:
+        plt.ion()
+        fig=plt.figure(figsize=(10,5))
+
+    # Exact Results
+    if compare_to_exact or compare_wf:
+        H, e0, v0, configs = analyse_exact(h, do_printsign=False)
+
+    el=[] # to store energy
+    vv_pre = None
+    print('\nRunning 0-th Iteration.')
+    for info in optimizer:
+        # `sampels` and `opq_vals` are cached!
+        ei = problem.cache['opq_vals'][0]  
+
+        if do_plot_wf:
+            vv = rbm.tovec(mag=h.mag)
+            vv = vv/np.linalg.norm(vv)
+
+            fig.clear()
+            plt.subplot(121)
+            compare_wf(vv, v0)
+            plt.subplot(122)
+            scatter_vec_phase(vv, vv_pre)
+            D=0.8
+            plt.xlim(-D,D)
+            plt.ylim(-D,D)
+            plt.pause(0.01)
+            vv_pre = vv
+
+        if compare_to_exact:
+            err=abs(e0-ei)/(abs(e0)+abs(ei))*2
+            print('E/site = %s (%s), Error = %.4f%%'%(ei/h.nsite,e0/h.nsite,err*100))
+        else:
+            print('E/site = %s'%(ei/h.nsite,))
+        el.append(ei)
+
+        num_iter = info['n_iter']
+        if num_iter>=1000:
+            break
+        print('\nRunning %s-th Iteration.'%(num_iter+1))
+
+    np.savetxt('%s/el-%s-J2%s.dat'%(folder,h.nsite,h.J2),el)
+    np.savetxt('%s/rbm-%s-J2%s.dat'%(folder,h.nsite,h.J2),el)
     pdb.set_trace()
 
 def show_el44(window=None):
