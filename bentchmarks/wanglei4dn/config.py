@@ -6,11 +6,12 @@ num_features_list = [
         [16, 128, 64, 32],
         [16, 128, 64, 32, 16],
         [32, 256, 64, 16, 8],
+        [1, 16, 256, 16],
         ]
 
 def modifyconfig_and_getnn(config, bentch_id):
     nfs = num_features_list[bentch_id]
     rbm = WangLei4(input_shape=tuple(config['hamiltonian']['size']),\
             NF=nfs[0], K=4, num_features=nfs[1:],
-            version='conv', dtype='complex128')
+            version='conv', itype='complex128')
     return rbm

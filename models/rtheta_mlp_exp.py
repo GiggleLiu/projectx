@@ -30,7 +30,7 @@ class RTheta_MLP_EXP(StateNN):
         eta=0.1
         super(RTheta_MLP_EXP, self).__init__(dtype, do_shape_check=False)
 
-        self.layers.append(functions.Reshape(input_shape, dtype=dtype, output_shape=(1,)+input_shape))
+        self.layers.append(functions.Reshape(input_shape, itype=dtype, output_shape=(1,)+input_shape))
         self.add_layer(SPConv, weight=eta*typed_randn(dtype, (self.num_feature_hidden, 1, nsite)),
                 bias=eta*typed_randn(dtype, (num_feature_hidden,)), boundary='P')
         self.add_layer(functions.Log2cosh)

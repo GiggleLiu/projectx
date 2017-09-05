@@ -3,14 +3,14 @@
 import fire, os, sys
 
 class UI(object):
-    def bentchmark(self, configfile, id, do_plot_wf = False, compare_to_exact = True, e0=None):
+    def bentchmark(self, configfile, id, e0=None):
         from problems import load_config
         config = load_config(configfile)
         folder = os.path.dirname(configfile)
         n = config['mpi']['num_core']
 
         logfile = '%s/log-%s.log'%(folder,id)
-        options = ' '.join(['%s'%item for item in [configfile, id, do_plot_wf, compare_to_exact, e0]])
+        options = ' '.join(['%s'%item for item in [configfile, id, e0]])
         exec_code = 'python bentchmark.py %s'%(options,)
         exec_code = 'nohup mpirun -n %s %s > %s &'%(n,exec_code,logfile)
         print('Excuting: %s'%exec_code)

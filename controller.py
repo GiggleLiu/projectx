@@ -2,10 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from profilehooks import profile
 import scipy.sparse as sps
-import pdb, os
+import pdb, os, sys
 
 from problems import ModelProbDef, load_hamiltonian, get_optimizer, load_config, pconfig
-from utils import scatter_vec_phase, compare_wf, analyse_exact, check_sample, sign_func_from_vec
+from utils import analyse_exact, sign_func_from_vec
+from plotlib import scatter_vec_phase, compare_wf, check_sample
 from qstate.sampler import get_ground_toynn
 from qstate.sampler.mpiutils import RANK
 
@@ -119,7 +120,7 @@ def run_rtheta(J2, nsite, rtheta_training_ratio, momentum=0.):
     from models.wanglei2 import WangLei2
     # definition of a problem
     h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
-    rbm = WangLei2(input_shape=(h.nsite,),num_feature_hidden=4, use_msr=False, theta_period=2, with_linear=False, dtype='float64')
+    rbm = WangLei2(input_shape=(h.nsite,),num_feature_hidden=4, use_msr=False, theta_period=2, with_linear=False, itype='float64')
     problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd')
     sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     sr.rtheta_training_ratio = rtheta_training_ratio
@@ -265,7 +266,7 @@ def run_wanglei(J2, nsite):
     from models.wanglei import WangLei
     # definition of a problem
     h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
-    rbm = WangLei(input_shape=(h.nsite,),num_features=[16, 64, 16], version='linear', use_conv=True, dtype='complex128')
+    rbm = WangLei(input_shape=(h.nsite,),num_features=[16, 64, 16], version='linear', use_conv=True, itype='complex128')
     problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', sr_layerwise=True)
     sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     vmc.inverse_rate = 0.05
@@ -333,7 +334,7 @@ def rbm_given_sign(J2, nsite):
     if compare_to_exact or compare_wf:
         H, e0, v0, configs = analyse_exact(h, do_printsign=False)
 
-    rbm = RBM(input_shape=(h.nsite,),num_feature_hidden=4, dtype='float64', sign_func = sign_func_from_vec(h.configs, v0))
+    rbm = RBM(input_shape=(h.nsite,),num_feature_hidden=4, itype='float64', sign_func = sign_func_from_vec(h.configs, v0))
     problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', sr_layerwise=False)
     sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     vmc.inverse_rate = 0.05
@@ -389,7 +390,7 @@ def run_rtheta_switch(J2, nsite, rtheta_training_ratio, switch_step, momentum=0.
     from models.wanglei2 import WangLei2
     # definition of a problem
     h = load_hamiltonian('J1J2', size=(nsite,), J1=1.,J2=J2)
-    rbm = WangLei2(input_shape=(h.nsite,),num_feature_hidden=4, use_msr=False, theta_period=2, with_linear=False, dtype='float64')
+    rbm = WangLei2(input_shape=(h.nsite,),num_feature_hidden=4, use_msr=False, theta_period=2, with_linear=False, itype='float64')
     #rbm.thnn = get_exact_thnn4(fixed_var=True)
     problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='sd')
     sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
@@ -468,7 +469,7 @@ def run_target_sign(J2, nsite):
     from models.wanglei import WangLei
     # definition of a problem
     h = load_hamiltonian('J1J2', size=(nsite,), J2=J2)
-    rbm = WangLei(input_shape=(h.nsite,), version='linear', use_conv=True, dtype='complex128')
+    rbm = WangLei(input_shape=(h.nsite,), version='linear', use_conv=True, itype='complex128')
     problem = ModelProbDef(hamiltonian=h,rbm=rbm,reg_method='delta', sr_layerwise=True)
     sr, rbm, vmc = problem.sr, problem.rbm, problem.vmc
     vmc.inverse_rate = 0.05
@@ -629,7 +630,7 @@ def run_wanglei3(J2, size, optimize_method='adam', momentum=0., do_plot_wf = Tru
     from models.wanglei3 import WangLei3
     # definition of a problem
     h = load_hamiltonian('J1J2', size=size, J2=J2)
-    rbm = WangLei3(input_shape=size,num_features=[8], version='conv', dtype='complex128')
+    rbm = WangLei3(input_shape=size,num_features=[8], version='conv', itype='complex128')
 
     # visualize network
     from poornn import viznn
@@ -694,7 +695,7 @@ def run_wanglei4(J2, size, optimize_method='adam', momentum=0., do_plot_wf = Tru
     from models.wanglei4 import WangLei4
     # definition of a problem
     h = load_hamiltonian('J1J2', size=size, J2=J2)
-    rbm = WangLei4(input_shape=size,NF=8, K=3,num_features=[8], version='conv', dtype='complex128')
+    rbm = WangLei4(input_shape=size,NF=8, K=3,num_features=[8], version='conv', itype='complex128')
 
     # visualize network
     from poornn import viznn
@@ -754,42 +755,3 @@ def run_wanglei4(J2, size, optimize_method='adam', momentum=0., do_plot_wf = Tru
 
     np.savetxt('data/el-%s%s.dat'%(h.nsite,'p' if h.periodic else 'o'),el)
     pdb.set_trace()
-
-def show_el44(window=None):
-    datafile = 'data/el44-J20.8.dat'
-    EG=-0.627335103992*16
-    # prepair data
-    el=np.loadtxt(datafile)
-    steps=np.arange(len(el))
-
-    plt.ion()
-    plt.plot(steps,el, lw=2, color='k')
-    plt.xlabel('Step')
-    plt.ylabel('$E$')
-    plt.xscale('log')
-    if EG is not None: plt.axhline(y=EG, ls='--', color='#666666')
-    if window is not None: plt.ylim(*window)
-    plt.show()
-    pdb.set_trace()
-    plt.savefig('data/ENG44%s-J20.8.png'%('[%s,%s]'%tuple(window) if window is not None else  ''))
-
-def show_el44(window=None):
-    datafile = 'data/el44-J20.8.dat'
-    EG=-0.627335103992*16
-    # prepair data
-    el=np.loadtxt(datafile)
-    steps=np.arange(len(el))
-
-    plt.ion()
-    plt.plot(steps,el, lw=2, color='k')
-    plt.xlabel('Step')
-    plt.ylabel('$E$')
-    plt.xscale('log')
-    if EG is not None: plt.axhline(y=EG, ls='--', color='#666666')
-    if window is not None: plt.ylim(*window)
-    plt.show()
-    pdb.set_trace()
-    plt.savefig('data/ENG44%s-J20.8.png'%('[%s,%s]'%tuple(window) if window is not None else  ''))
-
-def show_kernel(rbm):
-    kernel = rbm.layers[2]

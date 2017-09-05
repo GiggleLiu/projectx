@@ -31,7 +31,7 @@ class PSNN(ThetaNN):
         super(PSNN, self).__init__('float64' if output_mode=='theta' else 'complex128')
 
         dtype = 'float64'
-        self.layers.append(functions.Reshape(input_shape, dtype='float64', output_shape=(num_batch,1)+site_shape))
+        self.layers.append(functions.Reshape(input_shape, itype='float64', output_shape=(num_batch,1)+site_shape))
         if use_msr:
             weight=np.array([[[np.pi/2,0]]])
             bias=np.array([np.pi/2])

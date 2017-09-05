@@ -22,26 +22,26 @@ class WangLei2(StateNN):
         :num_feature_hidden: int, number features in hidden layer.
         :use_msr: use marshall sign rule.
     '''
-    def __init__(self, input_shape, num_feature_hidden, with_linear=False, use_msr=False, theta_period=2, dtype='float64'):
+    def __init__(self, input_shape, num_feature_hidden, with_linear=False, use_msr=False, theta_period=2, itype='float64'):
         self.num_feature_hidden = num_feature_hidden
         self.use_msr = use_msr
         self.with_linear = with_linear
         nsite=np.prod(input_shape)
         eta=0.1
-        super(WangLei2, self).__init__(dtype, do_shape_check=False)
+        super(WangLei2, self).__init__(itype, do_shape_check=False)
 
-        self.layers.append(functions.Reshape(input_shape, dtype=dtype, output_shape=(1,)+input_shape))
-        self.add_layer(SPConv, weight=eta*typed_randn(dtype, (self.num_feature_hidden, 1, nsite)),
-                bias=eta*typed_randn(dtype, (num_feature_hidden,)), boundary='P')
+        self.layers.append(functions.Reshape(input_shape, itype=itype, output_shape=(1,)+input_shape))
+        self.add_layer(SPConv, weight=eta*typed_randn(itype, (self.num_feature_hidden, 1, nsite)),
+                bias=eta*typed_randn(itype, (num_feature_hidden,)), boundary='P')
         self.add_layer(functions.Log2cosh)
         self.add_layer(functions.Reshape, output_shape=(num_feature_hidden, nsite) if with_linear else (num_feature_hidden*nsite,))
         self.add_layer(functions.Sum, axis=-1)
         self.add_layer(functions.Exp)
         if with_linear:
-            #self.add_layer(Linear, weight=eta*typed_randn(dtype, (1, self.num_feature_hidden)),
-            #        bias=0*typed_randn(dtype, (1,)))
-            self.add_layer(Linear, weight=np.array([[1,1,-1,-1]], dtype=dtype),
-                    bias=0*typed_randn(dtype, (1,)),var_mask=(0,0))
+            #self.add_layer(Linear, weight=eta*typed_randn(itype, (1, self.num_feature_hidden)),
+            #        bias=0*typed_randn(itype, (1,)))
+            self.add_layer(Linear, weight=np.array([[1,1,-1,-1]], dtype=itype),
+                    bias=0*typed_randn(itype, (1,)),var_mask=(0,0))
             self.add_layer(functions.Reshape, output_shape=())
 
         if use_msr and theta_period!=2:

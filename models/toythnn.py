@@ -15,7 +15,7 @@ class ToyTHNN(ThetaNN):
     '''
     def __init__(self, h, use_msr=False):
         self.h = h
-        self.dtype='float64'
+        self.itype='float64'
         self.vec = 2*np.pi*np.random.random(len(h.configs))
 
     def get_variables(self):
@@ -43,7 +43,7 @@ class ToyTHNN(ThetaNN):
 
     def backward(self, ys, dy=None):
         if dy is None:
-            dy = np.array(1,dtype=self.dtype)
+            dy = np.array(1,dtype=self.itype)
         dw = np.zeros_like(self.vec)
         dw[self.h.config_indexer[packnbits_pm(ys[0])]]=dy
         return dw, None

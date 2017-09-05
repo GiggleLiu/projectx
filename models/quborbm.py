@@ -20,15 +20,15 @@ class RBM(ANN):
         :input_shape: tuple, (1, N1, N2 ...)
         :num_feature_hidden: int, number features in hidden layer.
     '''
-    def __init__(self, input_shape, num_feature_hidden, dtype='complex128'):
-        self.num_feature_hidden, self.dtype = num_feature_hidden, dtype
+    def __init__(self, input_shape, num_feature_hidden, itype='complex128'):
+        self.num_feature_hidden, self.itype = num_feature_hidden, itype
         nsite=np.prod(input_shape)
         eta=0.1
-        super(RBM, self).__init__(dtype, do_shape_check=False)
+        super(RBM, self).__init__(itype, do_shape_check=False)
 
-        self.layers.append(functions.Reshape(input_shape, dtype=dtype, output_shape=(1,)+input_shape))
-        self.add_layer(SPConv, weight=eta*typed_randn(self.dtype, (self.num_feature_hidden, 1, nsite)),
-                bias=eta*typed_randn(self.dtype, (num_feature_hidden,)), boundary='P')
+        self.layers.append(functions.Reshape(input_shape, itype=itype, output_shape=(1,)+input_shape))
+        self.add_layer(SPConv, weight=eta*typed_randn(self.itype, (self.num_feature_hidden, 1, nsite)),
+                bias=eta*typed_randn(self.itype, (num_feature_hidden,)), boundary='P')
         self.add_layer(functions.Log2cosh)
         self.add_layer(functions.Reshape, output_shape=(self.num_feature_hidden*nsite,))
         self.add_layer(functions.Sum, axis=0)

@@ -22,10 +22,10 @@ class ToyRTH(StateNN):
     '''
     def __init__(self, input_shape, use_msr=False, theta_period=2):
         self.use_msr = use_msr
-        dtype = 'float64'
+        itype = 'float64'
         nsite=np.prod(input_shape)
         eta=0.1
-        self.vec = eta*typed_randn(dtype, input_shape)
+        self.vec = eta*typed_randn(itype, input_shape)
 
         if use_msr and theta_period!=2:
             raise ValueError()

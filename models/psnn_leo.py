@@ -30,8 +30,8 @@ class PSNN(ThetaNN):
         eta=0.1
         super(PSNN, self).__init__('float64' if output_mode=='theta' else 'complex128')
 
-        dtype = 'float64'
-        self.layers.append(functions.Reshape(input_shape, dtype='float64', output_shape=(num_batch,1)+site_shape))
+        itype = 'float64'
+        self.layers.append(functions.Reshape(input_shape, itype='float64', output_shape=(num_batch,1)+site_shape))
         weight=eta*typed_randn('float64', (nf, 1, nsite))
         bias=eta*typed_randn('float64', (nf, ))
         var_mask=(1,1)
@@ -41,8 +41,8 @@ class PSNN(ThetaNN):
             self.add_layer(functions.Power, order=2)
             #self.add_layer(functions.Log2cosh)
             self.add_layer(functions.Sum, axis=-1)
-            self.add_layer(Linear, weight=eta*typed_randn(dtype, (1, nf)),
-                    bias=0*typed_randn(dtype, (1,)), var_mask=(1,0))
+            self.add_layer(Linear, weight=eta*typed_randn(itype, (1, nf)),
+                    bias=0*typed_randn(itype, (1,)), var_mask=(1,0))
         else:
             self.add_layer(functions.Reshape, output_shape=(num_batch,nf*nsite//period))
             self.add_layer(functions.Sum, axis=-1)
