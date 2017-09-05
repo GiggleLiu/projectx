@@ -20,8 +20,14 @@ class WangLei4(StateNN):
         :input_shape: tuple, (1, N1, N2 ...)
         :num_feature_hidden: int, number features in hidden layer.
     '''
-    def __init__(self, input_shape, NF=4, K=2, num_features=[12], dtype='float64',version='linear'):
+    def __init__(self, input_shape, NF=4, K=2, num_features=[12], dtype='float64',version='linear', stride=None):
         self.num_features, self.dtype = num_features, dtype
+        if stride is None:
+            if any([n%4!=0 for n in input_shape]):
+                stride=2
+            else:
+                stride=1
+        self.stride = stride
         nsite=np.prod(input_shape)
         eta=0.2
         super(WangLei4, self).__init__(dtype, do_shape_check=False)
@@ -30,7 +36,6 @@ class WangLei4(StateNN):
         ishape = (1,)+input_shape
         self.layers.append(functions.Reshape(input_shape, dtype=dtype, output_shape=ishape))
 
-        stride = 1
         self.add_layer(functions.Log)
         self.add_layer(SPConv, weight=eta*typed_randn(self.dtype, (NF,1)+(K,)*D),
                 bias=eta*typed_randn(self.dtype, (NF,)), boundary='P', strides=(stride,)*D)
@@ -64,3 +69,4 @@ class WangLei4(StateNN):
         else:
             raise ValueError('version %s not exist'%version)
         self.add_layer(functions.Reshape, output_shape=())
+

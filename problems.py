@@ -57,7 +57,7 @@ class ModelProbDef(ProbDef):
         #Create a VMC sampling engine.
         cgen=SpinConfigGenerator(initial_config=[-1,1]*(hamiltonian.nsite//2)+\
                 [1]*(hamiltonian.nsite%2),nflip=2 if hamiltonian.mag is not None else 1, inverse_rate=0.05)
-        vmc=VMC(cgen, nbath=200*hamiltonian.nsite, measure_step=hamiltonian.nsite,sampling_method='metropolis')
+        vmc=VMC(cgen, nbath=200*hamiltonian.nsite, measure_step=hamiltonian.nsite,sampling_method='metropolis',iprint=0)
 
         ##################### choose an regulation method ##############################
         if reg_method == 'delta':
@@ -107,6 +107,7 @@ def load_config(config_file):
     from validate import Validator
 
     #read config
+    #specfile=os.path.join(os.path.dirname(__file__),'config-spec.ini')
     specfile=os.path.join(os.path.dirname(__file__),'config-spec.ini')
     config=ConfigObj(config_file,configspec=specfile,stringify=True)
     validator = Validator()
@@ -133,7 +134,7 @@ def pconfig(config, rbm):
     vmcconfig = config['vmc']
     vmc=VMC(cgen, nbath=vmcconfig['num_bath_sweep']*hamiltonian.nsite, \
             measure_step=vmcconfig['num_sweep_per_sample']*hamiltonian.nsite,\
-            sampling_method=vmcconfig['accept_method'])
+            sampling_method=vmcconfig['accept_method'], iprint=vmcconfig['iprint'])
 
     # sr
     srconfig = config['sr']

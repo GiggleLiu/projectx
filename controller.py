@@ -1,12 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.sparse as sps
 from profilehooks import profile
+import scipy.sparse as sps
 import pdb, os
 
 from problems import ModelProbDef, load_hamiltonian, get_optimizer, load_config, pconfig
 from utils import scatter_vec_phase, compare_wf, analyse_exact, check_sample, sign_func_from_vec
 from qstate.sampler import get_ground_toynn
+from qstate.sampler.mpiutils import RANK
 
 def run_rtheta_toy(J2, nsite, version, rtheta_training_ratio, momentum=0.):
     from models.wanglei2 import WangLei2
@@ -89,7 +90,6 @@ def run_ed_msr(J2, nsite):
     plt.legend([r'$+$', r'$-$'])
     pdb.set_trace()
 
-@profile
 def scale_ed_msr(size, J2MIN=0, J2MAX=1, NJ2=51, yscale='log'):
     from qstate.classifier.rules import marshall_sign_rule
     J2L = np.linspace(J2MIN, J2MAX, NJ2)
@@ -772,68 +772,6 @@ def show_el44(window=None):
     plt.show()
     pdb.set_trace()
     plt.savefig('data/ENG44%s-J20.8.png'%('[%s,%s]'%tuple(window) if window is not None else  ''))
-
-def run_bentchmark(configfile, do_plot_wf = True, compare_to_exact = True):
-    folder = os.path.dirname(configfile)
-    config = load_config(configfile)
-
-    # definition of a neural network
-    from models.wanglei4 import WangLei4
-    rbm = WangLei4(input_shape=tuple(config['hamiltonian']['size']), NF=8, K=3,num_features=[8], version='conv', dtype='complex128')
-
-    # visualize network
-    from poornn import viznn
-    viznn(rbm, filename=folder+'/%s.png'%rbm.__class__.__name__)
-
-    optimizer, problem = pconfig(config, rbm)
-    h, sr, rbm, vmc = problem.hamiltonian, problem.sr, problem.rbm, problem.vmc
-
-    # setup canvas
-    if do_plot_wf:
-        plt.ion()
-        fig=plt.figure(figsize=(10,5))
-
-    # Exact Results
-    if compare_to_exact or compare_wf:
-        H, e0, v0, configs = analyse_exact(h, do_printsign=False)
-
-    el=[] # to store energy
-    vv_pre = None
-    print('\nRunning 0-th Iteration.')
-    for info in optimizer:
-        # `sampels` and `opq_vals` are cached!
-        ei = problem.cache['opq_vals'][0]  
-
-        if do_plot_wf:
-            vv = rbm.tovec(mag=h.mag)
-            vv = vv/np.linalg.norm(vv)
-
-            fig.clear()
-            plt.subplot(121)
-            compare_wf(vv, v0)
-            plt.subplot(122)
-            scatter_vec_phase(vv, vv_pre)
-            D=0.8
-            plt.xlim(-D,D)
-            plt.ylim(-D,D)
-            plt.pause(0.01)
-            vv_pre = vv
-
-        if compare_to_exact:
-            err=abs(e0-ei)/(abs(e0)+abs(ei))*2
-            print('E/site = %s (%s), Error = %.4f%%'%(ei/h.nsite,e0/h.nsite,err*100))
-        else:
-            print('E/site = %s'%(ei/h.nsite,))
-        el.append(ei)
-
-        num_iter = info['n_iter']
-        if num_iter>=1000:
-            break
-        print('\nRunning %s-th Iteration.'%(num_iter+1))
-
-    np.savetxt('%s/el-%s-J2%s.dat'%(folder,h.nsite,h.J2),el)
-    np.savetxt('%s/rbm-%s-J2%s.dat'%(folder,h.nsite,h.J2),el)
-    pdb.set_trace()
 
 def show_el44(window=None):
     datafile = 'data/el44-J20.8.dat'
