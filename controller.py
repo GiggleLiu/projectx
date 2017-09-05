@@ -790,3 +790,6 @@ def show_el44(window=None):
     plt.show()
     pdb.set_trace()
     plt.savefig('data/ENG44%s-J20.8.png'%('[%s,%s]'%tuple(window) if window is not None else  ''))
+
+def show_kernel(rbm):
+    kernel = rbm.layers[2]

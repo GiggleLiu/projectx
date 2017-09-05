@@ -12,7 +12,7 @@ JgLiu:
 
 - [x] $N = 20, J_2 = 0, 0.2$
 - [x] $N = 10$, show $\psi$ and $\psi_{exact}$
-- [ ] prove conve optimization if signs known
+- [X] prove conve optimization if signs known
 - [ ] calculate AFM structure factor.
 - [x] optimize SA solver using sparsity
 - [x] skip sampling
@@ -21,10 +21,12 @@ JgLiu:
 - [x] VMC with 5% chance flip a configuration
 - [x] train $\theta$ with amplitude fixed, plot it.
 - [x] translational invariance
-- [ ] test $2D $ $J_1-J_2$ model
+- [X] test $2D $ $J_1-J_2$ model
 - [ ] representation power of $\theta$ network
-- [ ] note: networks.
+- [X] visualization of networks.
 - [ ] bentchmark 40 sites, $J_2= 0.8, E_G =-17.???$, $J_2=0, E_G=$,$J_2=0.25, E_G=-16.???$
+- [ ] bentchmark depth of network, using 10000 iteration.
+- [ ] plot filters in first layer.
 
 Roger:
 

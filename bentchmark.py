@@ -30,7 +30,7 @@ def run_bentchmark(configfile, bentch_id, do_plot_wf = True, compare_to_exact = 
     if RANK==0:
         # visualize network
         from poornn import viznn
-        viznn(rbm, filename=folder+'/%s.png'%rbm.__class__.__name__)
+        viznn(rbm, filename=folder+'/%s-%s.png'%(rbm.__class__.__name__,bentch_id))
 
         # now flush configuration to stdout
         print('#'*20+' Configuration '+'#'*20)

@@ -126,7 +126,7 @@ diff rate = 0.000833871120181(norm=1.382845482)
 
 $J_2= 0.2$, $|\langle \Psi|\Psi_0\rangle|^2 = 0.999771263796$
 
-![WF_J20.2_N10](./WF_J20.2_N10.png)
+![WF_J20.2_N10](img/WF_J20.2_N10.png)
 
 Day 15 Aug
 ==============================
@@ -257,7 +257,7 @@ Day 23 Aug
 Violation of Marshall Sign Rule
 ---------------------------
 
-![MSR-J1J2_N12](./MSR-J1J2_N12.png)
+![MSR-J1J2_N12](img/MSR-J1J2_N12.png)
 
 $J_1,J_2$ model, 12 sites.
 
@@ -267,7 +267,7 @@ $E$ is evaluated using ${\rm MSR}(|v|)$. Here, $\rm MSR$ is Marshall Sign Rule f
 
 To make it clear,
 
-![MSR-J1J2_N12_log](./MSR-J1J2_N12_log.png)
+![MSR-J1J2_N12_log](img/MSR-J1J2_N12_log.png)
 
 we see when $J_2\leq0.4$, MSR is only slightly violated.
 
@@ -279,27 +279,27 @@ To run this example,
 
 For $2D$  $4\times4$ model, we have the similar behavior
 
-![MSR-J1J22D_N16_log](./MSR-J1J22D_N16_log.png)
+![MSR-J1J22D_N16_log](img/MSR-J1J22D_N16_log.png)
 
 ## Training large $J_2$
 For large $J_2$, MSR is strongly violated, as a result, neural networks are extremely hard to train. For example $J_2=0.8$.
 * given sign, 1-layer RBM, after 300 steps of SR($\delta=10^{-4}$ regulation) training,  $\|\langle\Psi_0|\Psi\rangle\|_2\simeq0.999$, Error in energy is about $0.05\%$.
 
-  ![Exact-Sign-J20.8-RBM](./Exact-Sign-J20.8-RBM.png)
+  ![Exact-Sign-J20.8-RBM](img/Exact-Sign-J20.8-RBM.png)
 
 * not given sign, complex 1 Conv-Layer + 2 Linear-Layer (with 16, 8 features), $\|\langle\Psi_0|\Psi\rangle\|_2\simeq0.57$, Error in energy is about $2.5\%$.
 
-  ![WL_16](./WL_16.png)
+  ![WL_16](img/WL_16.png)
 
   ## Given Amplitude to train sign
 
   $J_2=0.8, N=10, E_G=-0.433768079327$.
 
-  For vectors, ![WL_16](./SIGN-N10-J20.8-2.png)
+  For vectors, ![WL_16](img/SIGN-N10-J20.8-2.png)
 
 For 1-layer/2-layer network, $E=-0.145755657726, overlap = 0.09$, they do not converge!
 
-![WL_16](./SIGN-N10-J20.8-1l.png)
+![WL_16](img/SIGN-N10-J20.8-1l.png)
 
 without TI, even worse.
 
@@ -339,14 +339,43 @@ Instead of putting a non-linear function layer after convolution, or training XO
 
 Our New Network that works extremely fine in$N=8,12, J_2=0.8$ network.
 
-![wanglei3](./WangLei3.png)
+![wanglei3](img/WangLei3.png)
 
 Our new network that works for $4\times4, J_2=0.8$ networks.
 
-![wanglei4](./WangLei4.png)
+![wanglei4](img/WangLei4.png)
 
 Result, Energy as a function of steps, with $x$ axis in log scale.
-![el44](./ENG44-J20.8.png)
+![el44](img/ENG44-J20.8.png)
 
 The dashed line is the exact energy. Zoom in, we see it is still going down
-![el44](./ENG44[-10.1,-8]-J20.8.png)
+![el44](img/ENG44[-10.1,-8]-J20.8.png)
+
+
+# Day 5 Sep
+Bentchmark on filter size $K$ and network depth $D$.
+Model parameter $J_2=0.5, size = (4, 4)$, exact energy is -8.45792335.
+
+## Bentchmark for different kernel size
+
+### structures
+For $K=1,2,3,4$ (filter size $(K\times K)$), using number of features [8, 32]
+
+|                   K=1                    |                   K=2                    |                   K=3                    |                   K=4                    |
+| :--------------------------------------: | :--------------------------------------: | :--------------------------------------: | :--------------------------------------: |
+| ![](../bentchmarks/wanglei4K/WangLei4-0.png) | ![](../bentchmarks/wanglei4K/WangLei4-1.png) | ![](../bentchmarks/wanglei4K/WangLei4-2.png) | ![](../bentchmarks/wanglei4K/WangLei4-3.png) |
+
+### Error as a function of step
+![](img/errl-K.png)
+
+## Bentchmark for different network depth
+
+### structures
+For $K=4$ (filter size $(K\times K)$), using number of features as shown in the following table
+
+|                  8, 32                   |               16, 128, 32                |             16, 128, 64, 32              |           16, 128, 64, 32, 16            |            32, 256, 64, 16, 8            |
+| :--------------------------------------: | :--------------------------------------: | :--------------------------------------: | :--------------------------------------: | :--------------------------------------: |
+| ![](../bentchmarks/wanglei4dn/WangLei4-0.png) | ![](../bentchmarks/wanglei4dn/WangLei4-1.png) | ![](../bentchmarks/wanglei4dn/WangLei4-2.png) | ![](../bentchmarks/wanglei4dn/WangLei4-3.png) | ![](../bentchmarks/wanglei4dn/WangLei4-4.png) |
+
+### Error as a function of step
+![](img/errl-dn.png)
