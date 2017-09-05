@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from poornn.checks import check_numdiff
 from qstate.core.utils import unpacknbits_pm, packnbits_pm
 from qstate.sampler import SR
+from qstate.sampler.mpiutils import RANK
 
 def measure_opq(rbm, opq, samples, sign_strategy=('NONE',{})):
     '''
@@ -50,7 +51,7 @@ def analyse_exact(h, do_printsign=False, num_eng=1):
 
     if do_printsign:
         print_mat_sign(configs=configs, mat=v[:,np.newaxis]*H*v, signs=sign(v))
-    print('Lowest %s energies = %s'%(num_eng, e_true[:num_eng]))
+    if RANK==0: print('Lowest %s energies = %s'%(num_eng, e_true[:num_eng]))
     return H, e, v, configs
 
 def check_rbm_numdiff(rbm, num_check=10):
