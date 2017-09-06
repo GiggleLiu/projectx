@@ -16,6 +16,12 @@ class UI(object):
         print('Excuting: %s'%exec_code)
         os.system(exec_code)
 
+    def bdn(self, id):
+        self.bentchmark(configfile='bentchmarks/wanglei4dn/config-sample.ini', id=id, e0=None)
+
+    def bK(self, id):
+        self.bentchmark(configfile='bentchmarks/wanglei4K/config-sample.ini', id=id, e0=None)
+
     def test(self, arg1, arg2):
         print('GET: arg1 = %s, arg2 = %s'%(arg1, arg2))
 
