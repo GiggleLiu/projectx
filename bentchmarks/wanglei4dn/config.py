@@ -7,6 +7,7 @@ num_features_list = [
         [16, 128, 64, 32, 16],
         [32, 256, 64, 16, 8],
         [1, 16, 256, 16],
+        [32, 64, 512, 64, 8],
         ]
 
 def modifyconfig_and_getnn(config, bentch_id):

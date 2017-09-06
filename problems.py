@@ -166,7 +166,7 @@ def pconfig(config, rbm):
     return optimizer, prob
 
 
-def get_optimizer(wrt, fprime, optimize_method, step_rate, momentum=0.0, decay=0.9):
+def get_optimizer(wrt, fprime, optimize_method, step_rate, momentum=0.0, decay=0.9, **kwargs):
     '''Get an optimizer.'''
     if optimize_method == 'rmsprop':
         optimizer=RmsProp(wrt=wrt, fprime=fprime,step_rate=step_rate, decay=decay, momentum=momentum)

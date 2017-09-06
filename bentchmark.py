@@ -28,6 +28,7 @@ def run_bentchmark(configfile, bentch_id, monitors=[]):
 
     optimizer, problem = pconfig(config, rbm)
     h, sr, rbm, vmc = problem.hamiltonian, problem.sr, problem.rbm, problem.vmc
+    max_iter = config['optimize']['max_iter']
 
     if RANK==0:
         _save_net_and_show_config(rbm, config, folder, bentch_id)
@@ -44,7 +45,7 @@ def run_bentchmark(configfile, bentch_id, monitors=[]):
             el.append(ei)
 
         num_iter = info['n_iter']
-        if num_iter>=1000:
+        if num_iter>=max_iter:
             break
 
         if RANK==0: print('\nRunning %s-th Iteration.'%(num_iter+1))
