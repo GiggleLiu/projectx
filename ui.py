@@ -34,6 +34,9 @@ class UI(object):
         '''shortcut for bentchmark filter size of wanglei4 model.'''
         self.bentchmark(configfile='bentchmarks/wanglei4K/config-sample.ini', id=id, e0=None)
 
+    def b6(self, id):
+        self.bentchmark(configfile='bentchmarks/wanglei6/config-sample.ini', id=id, e0=-0.503810*36)
+
     def test(self, arg1, arg2):
         print('GET: arg1 = %s, arg2 = %s'%(arg1, arg2))
 
