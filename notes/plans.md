@@ -1,14 +1,9 @@
 Plans
 ============================
 
-## DMRG Result
-J1 = 1, J2 = 0.0, N = 20, E = -8.9044
-J1 = 1, J2 = 0.2, N = 20, E = -8.2029
-J1 = 1, J2 = 0.5, N = 20, E = -7.5
+# To Do List
 
-## To Do List
-
-JgLiu:
+## JgLiu:
 
 - [x] $N = 20, J_2 = 0, 0.2$
 - [x] $N = 10$, show $\psi$ and $\psi_{exact}$
@@ -28,13 +23,34 @@ JgLiu:
 - [ ] bentchmark depth of network, using 10000 iteration.
 - [ ] plot filters in first layer.
 
+## Bentch Mark Guidelines on WangLei4 model.
+
+Important Hyper-Parameters
+
+- [ ] depth of network
+	* As the network become deep, the training convergence become slow.
+- [X] filter size
+	* Error systemetically decrease as $K$ increses, $K=4$ for $size = (4,4)$ is suggested.
+
+- [ ] initialization parameters $\eta$
+- [ ] filter data type "complex128"/"float64"
+- [X] different non-linear functions
+	* $x^3$ better than ReLU and Exp, Sin.
+	* $x^2, Cos$ do not work, symmetry reason?
+
+- [ ] learning strategy "gd"/"adam"/"rmsprop"/"sr"
+- [ ] learning rate
+
+Marginal Hyper-Parameters
+- [ ] vmc sample size
+
 Roger:
 
 - [ ] theta net
 - [ ] exp net
 - [ ] no theta
 
-## To Read List
+# To Read List
 - [ ] brief read phase transition and combinatorial optimization, stoquastic problem
 
 - [ ] read helmut's paper on spin glass
@@ -50,3 +66,8 @@ Roger:
       > https://arxiv.org/pdf/cond-mat/0003207.pdf
       >
       > http://iopscience.iop.org/article/10.1209/0295-5075/25/7/012/pdf
+
+# DMRG Result
+J1 = 1, J2 = 0.0, N = 20, E = -8.9044
+J1 = 1, J2 = 0.2, N = 20, E = -8.2029
+J1 = 1, J2 = 0.5, N = 20, E = -7.5
