@@ -25,7 +25,7 @@ class ProbDef(object):
         # update RBM
         rbm.set_variables(x)
 
-        # generate samples probabilities given by this new RBM
+        # generate samples with probabilities given by this new RBM
         samples = vmc.mpi_generate_samples(self.num_vmc_run, rbm, num_sample=self.num_vmc_sample)
 
         # assign signs to samples
@@ -40,6 +40,12 @@ class ProbDef(object):
         self.cache['opq_vals'] = opq_vals
         self.cache['samples'] = samples
         return gradient
+
+    def get_energy(self):
+        vmc, rbm, sr = self.vmc, self.rbm, self.sr
+        samples = vmc.mpi_generate_samples(self.num_vmc_run, rbm, num_sample=self.num_vmc_sample)
+        eng = self.hamiltonian.mpi_eval_on_samples(samples, rbm, update_samples=False)
+        return eng
 
 class ModelProbDef(ProbDef):
     '''

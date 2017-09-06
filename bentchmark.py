@@ -55,7 +55,6 @@ def run_bentchmark(configfile, bentch_id, monitors=[]):
         np.savetxt('%s/el-%s.dat'%(folder,bentch_id),np.real(el))
         np.savetxt('%s/rbm-%s.dat'%(folder,bentch_id),rbm.get_variables().view('float64'))
 
-
 def _save_net_and_show_config(rbm, config, folder, bentch_id):
     # visualize network
     from poornn import viznn
@@ -72,8 +71,29 @@ def _save_net_and_show_config(rbm, config, folder, bentch_id):
     print(rbm)
     print('-'*55+'\n')
 
+def load_rbm(configfile, bentch_id, i_iter = None):
+    '''
+    Load a network, if i_iter specified, load variables at the same time.
+    '''
+    config = load_config(configfile)
+    # folder to store data, containing config.py
+    folder = os.path.dirname(configfile)
+
+    # modification to parameters
+    sys.path.insert(0,folder)
+    from config import modifyconfig_and_getnn
+    rbm = modifyconfig_and_getnn(config, bentch_id)
+
+    if i_iter is not None:
+        rbm.set_variables(i_iter)
+    return rbm
+
 if __name__ == '__main__':
     np.random.seed(2)
-    from monitors import Print_eng_with_exact, print_eng, show_wf
+    from monitors import Print_eng_with_exact, print_eng, show_wf, DumpNetwork
     configfile, bentch_id, e0 = sys.argv[1:]
-    run_bentchmark(configfile, int(bentch_id), monitors = [Print_eng_with_exact(eval(e0))])
+    run_bentchmark(configfile, int(bentch_id),\
+            monitors = [
+                Print_eng_with_exact(eval(e0)),\
+                DumpNetwork(folder=os.path.dirname(configfile),token=bentch_id,step=1000)\
+                ])
