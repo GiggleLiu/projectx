@@ -7,7 +7,7 @@ Plans
 
 - [x] $N = 20, J_2 = 0, 0.2$
 - [x] $N = 10$, show $\psi$ and $\psi_{exact}$
-- [X] prove conve optimization if signs known
+- [ ] prove optimization is convex if signs are known
 - [ ] calculate AFM structure factor.
 - [x] optimize SA solver using sparsity
 - [x] skip sampling
@@ -16,27 +16,28 @@ Plans
 - [x] VMC with 5% chance flip a configuration
 - [x] train $\theta$ with amplitude fixed, plot it.
 - [x] translational invariance
-- [X] test $2D $ $J_1-J_2$ model
+- [x] test $2D $ $J_1-J_2$ model
 - [ ] representation power of $\theta$ network
-- [X] visualization of networks.
+- [x] visualization of networks.
 - [ ] bentchmark 40 sites, $J_2= 0.8, E_G =-17.???$, $J_2=0, E_G=$,$J_2=0.25, E_G=-16.???$
 - [ ] bentchmark depth of network, using 10000 iteration.
 - [ ] plot filters in first layer.
+- [ ] show why product network works
 
 ## Bentch Mark Guidelines on WangLei4 model.
 
 Important Hyper-Parameters
 
 - [ ] depth of network
-	* As the network become deep, the training convergence become slow.
-- [X] filter size
-	* Error systemetically decrease as $K$ increses, $K=4$ for $size = (4,4)$ is suggested.
+  * As the network become deep, the training convergence become slow.
+- [x] filter size
+  * Error systemetically decrease as $K$ increses, $K=4$ for $size = (4,4)$ is suggested.
 
 - [ ] initialization parameters $\eta$
 - [ ] filter data type "complex128"/"float64"
-- [X] different non-linear functions
-	* $x^3$ better than ReLU and Exp, Sin.
-	* $x^2, Cos$ do not work, symmetry reason?
+- [x] different non-linear functions
+  * $x^3$ better than ReLU and Exp, Sin.
+  * $x^2, Cos$ do not work, symmetry reason?
 
 - [ ] learning strategy "gd"/"adam"/"rmsprop"/"sr"
 - [ ] learning rate
