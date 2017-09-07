@@ -55,8 +55,7 @@ class UI(object):
         varfile = os.path.join(folder,'variables-%s%s.npy'%(id,istep))
         rbm.set_variables(np.load(varfile))
         optimizer, problem = pconfig(config, rbm)
-        print 'Energy at step %s = %s'%(istep, problem.get_energy())
-        pdb.set_trace()
+        print('Energy at step %s = %s'%(istep, problem.get_energy()))
      
 
     ######################  EXACT  #########################

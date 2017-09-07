@@ -4,6 +4,8 @@ num_features_list = [
         [16, 32, 128],
         [36, 72, 256],
         [36, 72, 256, 32],
+        [16, 16, 256, 64, 16, 4],  # slim network
+        [72, 144],  # fat network
         ]
 
 def modifyconfig_and_getnn(config, bentch_id):
