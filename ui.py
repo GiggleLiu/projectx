@@ -57,7 +57,6 @@ class UI(object):
         rbm.set_variables(np.load(varfile))
         optimizer, problem = pconfig(config, rbm)
         print('Energy at step %s = %s'%(istep, problem.get_energy()))
-        pdb.set_trace()
      
     def bshowe(self, subfolder, id):
         '''show energy function.'''
