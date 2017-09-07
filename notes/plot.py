@@ -8,7 +8,7 @@ def show_bentch44K():
     ion()
     for show_err in [True, False]:
         cla()
-        show_el(datafiles = ['../bentchmarks/wanglei4K/el-%i.dat'%i for i in range(ntask)],
+        show_el(datafiles = ['../benchmarks/wanglei4K/el-%i.dat'%i for i in range(ntask)],
                 EG = -8.45792335,
                 legends = ['K = %s'%(i+1) for i in range(ntask)],
                 show_err=show_err,
@@ -22,7 +22,7 @@ def show_bentch44dn():
     ion()
     for show_err in [True, False]:
         cla()
-        show_el(datafiles = ['../bentchmarks/wanglei4dn/el-%i.dat'%i for i in range(ntask)],
+        show_el(datafiles = ['../benchmarks/wanglei4dn/el-%i.dat'%i for i in range(ntask)],
                 EG = -8.45792335,
                 legends = ['structure = %s'%(i+1) for i in range(ntask)],
                 show_err=show_err,
@@ -31,7 +31,7 @@ def show_bentch44dn():
         savefig('img/%s-%s%s.png'%('errl' if show_err else 'el', token, ''))
 
 def show_kernel44K(bentch_id):
-    configfile = '../bentchmarks/wanglei4K/config-sample.ini'
+    configfile = '../benchmarks/wanglei4K/config-sample.ini'
     ion()
     show_kernel_bentch(configfile, bentch_id = bentch_id)
     colorbar()
