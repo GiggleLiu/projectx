@@ -19,8 +19,8 @@ Plans
 - [x] test $2D $ $J_1-J_2$ model
 - [ ] representation power of $\theta$ network
 - [x] visualization of networks.
-- [ ] bentchmark 40 sites, $J_2= 0.8, E_G =-17.???$, $J_2=0, E_G=$,$J_2=0.25, E_G=-16.???$
-- [ ] bentchmark depth of network, using 10000 iteration.
+- [ ] benchmark 40 sites, $J_2= 0.8, E_G =-17.???$, $J_2=0, E_G=$,$J_2=0.25, E_G=-16.???$
+- [ ] benchmark depth of network, using 10000 iteration.
 - [ ] plot filters in first layer.
 - [ ] show why product network works
 

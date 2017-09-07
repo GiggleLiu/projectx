@@ -22,12 +22,14 @@ def show_kernel(rbm):
     pcolormesh(strength.real)
     axis('equal')
 
-def show_el(datafiles, EG=None, xlogscale=True, window=None, legends=None, show_err=False):
+def show_el(datafiles, EG=None, xlogscale=True, window=None, legends=None,\
+        show_err=False, smooth_step=1):
     if legends is None: legends = np.arange(len(datafiles))
     # prepair data
     for datafile in datafiles:
         el=np.loadtxt(datafile)
-        steps=np.arange(len(el))
+        if smooth_step!=1: el=el.reshape([-1,smooth_step]).mean(axis=1)
+        steps=np.arange(len(el))*smooth_step
         if show_err:
             plot(steps,abs((el-EG)/EG), lw=2)
         else:

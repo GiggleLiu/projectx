@@ -14,7 +14,7 @@ Lowest 10 energies = [-4.15096326 -3.76842215 -3.70954039 -3.39455178 -3.3945517
 Lowest 10 energies = [-3.75       -3.75       -3.39978825 -3.27928965 -3.27928965 -3.13824484
  -3.13824484 -3.13464932 -2.98733684 -2.98733684]
 
-Exists degeneracy, not a good example for bentchmarks.
+Exists degeneracy, not a good example for benchmarks.
 
 * C: J2 = 0.2, N = 4
 
@@ -363,7 +363,7 @@ For $K=1,2,3,4$ (filter size $(K\times K)$), using number of features [8, 32]
 
 |                   K=1                    |                   K=2                    |                   K=3                    |                   K=4                    |
 | :--------------------------------------: | :--------------------------------------: | :--------------------------------------: | :--------------------------------------: |
-| ![](../bentchmarks/wanglei4K/WangLei4-0.png) | ![](../bentchmarks/wanglei4K/WangLei4-1.png) | ![](../bentchmarks/wanglei4K/WangLei4-2.png) | ![](../bentchmarks/wanglei4K/WangLei4-3.png) |
+| ![](../benchmarks/wanglei4K/WangLei4-0.png) | ![](../benchmarks/wanglei4K/WangLei4-1.png) | ![](../benchmarks/wanglei4K/WangLei4-2.png) | ![](../benchmarks/wanglei4K/WangLei4-3.png) |
 
 ### Error as a function of step
 ![](img/errl-K.png)
@@ -371,11 +371,34 @@ For $K=1,2,3,4$ (filter size $(K\times K)$), using number of features [8, 32]
 ## Bentchmark for different network depth
 
 ### structures
-For $K=4$ (filter size $(K\times K)$), using number of features as shown in the following table
+For $K=4$ (filter size $(K\times K)$), using number of features as shown in the following tables
 
 |                  8, 32                   |               16, 128, 32                |             16, 128, 64, 32              |           16, 128, 64, 32, 16            |            32, 256, 64, 16, 8            |
 | :--------------------------------------: | :--------------------------------------: | :--------------------------------------: | :--------------------------------------: | :--------------------------------------: |
-| ![](../bentchmarks/wanglei4dn/WangLei4-0.png) | ![](../bentchmarks/wanglei4dn/WangLei4-1.png) | ![](../bentchmarks/wanglei4dn/WangLei4-2.png) | ![](../bentchmarks/wanglei4dn/WangLei4-3.png) | ![](../bentchmarks/wanglei4dn/WangLei4-4.png) |
+| ![](../benchmarks/wanglei4dn/WangLei4-0.png) | ![](../benchmarks/wanglei4dn/WangLei4-1.png) | ![](../benchmarks/wanglei4dn/WangLei4-2.png) | ![](../benchmarks/wanglei4dn/WangLei4-3.png) | ![](../benchmarks/wanglei4dn/WangLei4-4.png) |
+Table: Configuration 1-5
+
+
+|              1, 16, 256, 16              |            32, 64, 512, 64, 8            |              4, 16, 256, 16              |
+| :--------------------------------------: | :--------------------------------------: | :--------------------------------------: |
+| ![](../benchmarks/wanglei4dn/WangLei4-5.png) | ![](../benchmarks/wanglei4dn/WangLei4-6.png) | ![](../benchmarks/wanglei4dn/WangLei4-7.png) |
+Table: Configuration 6-8
 
 ### Error as a function of step
 ![](img/errl-dn.png)
+
+# Day 7 Sep
+
+10000 step benchmark, lines are averaged over 20 steps (otherwise too noisy).
+
+### Networks
+
+![](img/errcr-dn.png)
+
+Fig: In above legends r for real product layer, c for complex. 2, 7, 8 are target networks.
+
+### Observations
+
+* complex product layers are stabler than real ones.
+* network - 7 (32, 64, 512, 64, 8), performance of deep and wide network is similar to shallow network - 2 (16, 128, 32), all with error $<0.1\%$, but converge slower.
+* number of features in product network is important.

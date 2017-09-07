@@ -6,7 +6,7 @@ Previous developments using tests are no longer maintained.
 ## Run a Benchmark
 
 ```bash
-$ ./run.sh bentchmark path/to/config.ini <int>
+$ ./run.sh benchmark path/to/config.ini <int>
 ```
 
 Here, `path/to/config-sample.ini` is a configuration file that validated by `config.spec.ini`, in out project, it is `benchmarks/xxxx/config-sample.ini` with xxxx specifying the benchmark term.
@@ -38,8 +38,6 @@ def modifyconfig_and_getnn(config, bentch_id):
 ```
 
 `config-file-name.ini` and it corresponding `config.py` defines a set of instances to benchmark, and results will be stored under the same folder as the `ini` file, controlled by our *naming system*.
-
-
 
 ## Introduction to MVC
 
