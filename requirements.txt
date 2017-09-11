@@ -2,7 +2,6 @@
 numpy
 scipy
 matplotlib
-pygraphviz
 jinja2
 ConfigObj
 

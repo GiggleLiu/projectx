@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import fire, os, sys, pdb
-import matplotlib.pyplot as plt
 import numpy as np
 
 from utils import analyse_exact
 from problems import load_hamiltonian
+from plotlib import plt
 
 class UI(object):
     ###################  BENTCHMARK  ######################
@@ -13,6 +13,12 @@ class UI(object):
         from problems import load_config
         config = load_config(configfile)
         folder = os.path.dirname(configfile)
+
+        # modification to parameters
+        sys.path.insert(0,folder)
+        from config import modifyconfig_and_getnn
+        rbm = modifyconfig_and_getnn(config, id)
+
         n = config['mpi']['num_core']
 
         logfile = '%s/log-%s.log'%(folder,id)
@@ -37,6 +43,9 @@ class UI(object):
 
     def b6(self, id):
         self.benchmark(configfile='benchmarks/wanglei6/config-sample.ini', id=id)
+
+    def bmpi(self, id):
+        self.benchmark(configfile='benchmarks/mpiacc/config-sample.ini', id=id)
 
     def test(self, arg1, arg2):
         print('GET: arg1 = %s, arg2 = %s'%(arg1, arg2))

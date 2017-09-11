@@ -1,12 +1,11 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from profilehooks import profile
 import scipy.sparse as sps
 import pdb, os, sys
 
 from problems import ModelProbDef, load_hamiltonian, get_optimizer, load_config, pconfig
 from utils import analyse_exact, sign_func_from_vec
-from plotlib import scatter_vec_phase, compare_wf, check_sample
+from plotlib import scatter_vec_phase, compare_wf, check_sample, plt
 from qstate.sampler import get_ground_toynn
 from qstate.sampler.mpiutils import RANK
 

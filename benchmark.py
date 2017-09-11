@@ -2,32 +2,31 @@
 Bentchmark utilities.
 '''
 import numpy as np
-import sys, os, pdb
-import matplotlib.pyplot as plt
+import sys, os, pdb,time
 
 from problems import load_config, pconfig
 from utils import analyse_exact
 from plotlib import scatter_vec_phase, compare_wf
 from qstate.sampler.mpiutils import RANK
 
-def run_benchmark(config, bentch_id, monitors=[], folder='.'):
+def run_benchmark(config, bench_id, monitors=[], folder='.'):
     '''
     Parameters:
         :configfile: str, the location of configuration file.
-        :bentch_id: number/str, specify the benchmark item.
+        :bench_id: number/str, specify the benchmark item.
         :monitors: func, functions take (problem, optimizer) as parameters.
     '''
     # modification to parameters
     sys.path.insert(0,folder)
     from config import modifyconfig_and_getnn
-    rbm = modifyconfig_and_getnn(config, bentch_id)
+    rbm = modifyconfig_and_getnn(config, bench_id)
 
     optimizer, problem = pconfig(config, rbm)
     h, sr, rbm, vmc = problem.hamiltonian, problem.sr, problem.rbm, problem.vmc
     max_iter = config['optimize']['max_iter']
 
     if RANK==0:
-        _save_net_and_show_config(rbm, config, folder, bentch_id)
+        _save_net_and_show_config(rbm, config, folder, bench_id)
         el=[] # to store energy
         print('\nRunning 0-th Iteration.')
 
@@ -48,13 +47,13 @@ def run_benchmark(config, bentch_id, monitors=[], folder='.'):
 
     if RANK==0:
         # save energy and network variables.
-        np.savetxt('%s/el-%s.dat'%(folder,bentch_id),np.real(el))
-        np.savetxt('%s/rbm-%s.dat'%(folder,bentch_id),rbm.get_variables().view('float64'))
+        np.savetxt('%s/el-%s.dat'%(folder,bench_id),np.real(el))
+        np.savetxt('%s/rbm-%s.dat'%(folder,bench_id),rbm.get_variables().view('float64'))
 
-def _save_net_and_show_config(rbm, config, folder, bentch_id):
+def _save_net_and_show_config(rbm, config, folder, bench_id):
     # visualize network
     from poornn import viznn
-    viznn(rbm, filename=folder+'/%s-%s.png'%(rbm.__class__.__name__,bentch_id))
+    viznn(rbm, filename=folder+'/%s-%s.png'%(rbm.__class__.__name__,bench_id))
 
     # now flush configuration to stdout
     print('#'*20+' Configuration '+'#'*20)
@@ -67,7 +66,7 @@ def _save_net_and_show_config(rbm, config, folder, bentch_id):
     print(rbm)
     print('-'*55+'\n')
 
-def load_rbm(configfile, bentch_id, i_iter = None):
+def load_rbm(configfile, bench_id, i_iter = None):
     '''
     Load a network, if i_iter specified, load variables at the same time.
     '''
@@ -78,7 +77,7 @@ def load_rbm(configfile, bentch_id, i_iter = None):
     # modification to parameters
     sys.path.insert(0,folder)
     from config import modifyconfig_and_getnn
-    rbm = modifyconfig_and_getnn(config, bentch_id)
+    rbm = modifyconfig_and_getnn(config, bench_id)
 
     if i_iter is not None:
         rbm.set_variables(i_iter)
@@ -86,7 +85,7 @@ def load_rbm(configfile, bentch_id, i_iter = None):
 
 def main():
     from monitors import Print_eng_with_exact, print_eng, show_wf, DumpNetwork
-    configfile, bentch_id = sys.argv[1:]
+    configfile, bench_id = sys.argv[1:]
     np.random.seed(2)
 
     config = load_config(configfile)
@@ -94,11 +93,14 @@ def main():
     folder = os.path.dirname(configfile)
     e0 = config['hamiltonian']['EG']
 
-    run_benchmark(config, int(bentch_id),\
+    run_benchmark(config, int(bench_id),\
             monitors = [
                 Print_eng_with_exact(e0),\
-                DumpNetwork(folder=os.path.dirname(configfile),token=bentch_id,step=1000)\
+                DumpNetwork(folder=os.path.dirname(configfile),token=bench_id,step=1000)\
                 ], folder=folder)
 
 if __name__ == '__main__':
+    t0=time.time()
     main()
+    t1=time.time()
+    print('Elapse %s'%(t1-t0))

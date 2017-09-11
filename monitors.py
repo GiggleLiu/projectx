@@ -6,10 +6,9 @@ testsuit take (optimizer, problem) as parameters.
 
 import numpy as np
 import pdb, os
-from matplotlib import pyplot as plt
 
 from utils import analyse_exact
-from plotlib import compare_wf, scatter_vec_phase
+from plotlib import compare_wf, scatter_vec_phase, plt
 
 __all__ = ['Show_wf', 'Print_eng_with_exact',
         'show_wf', 'print_eng_with_exact', 'print_eng']
