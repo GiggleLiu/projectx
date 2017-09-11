@@ -62,24 +62,68 @@ def show_kernel44K(bentch_id):
 def show_mpiacc(task='tianhe'):
     tdata = np.loadtxt('mpiacc-%s.tbl'%task)
     ncores, t_tots, t_fors, t_cnvs, t_mpis, accs = tdata.T
+    tmpis = t_tots-t_fors
     plt.ion()
-    plt.figure(figsize=(8,4))
-    plt.subplot(121)
+    plt.figure(figsize=(6,4))
+    plt.title('Component Analysis')
     plt.ylabel('niter/sec')
-    plt.plot(ncores, 1./tdata[:,1:4])
-    plt.legend(['total','forward','conv'])
-    plt.subplot(122)
-    plt.plot(ncores, t_mpis)
-    plt.plot(ncores, accs*1000, '-o')
-    plt.legend(['ncore','err*1000'])
+    for data, color in zip(tdata[:,1:4].T, ['r','g','b']):
+        plt.plot(ncores, 1./data, color=color)
+        plt.plot(ncores, 1./data[0]*ncores, color=color, ls='--')
+    plt.legend(['total', '%.4f'%(tdata[0,1]/tdata[-1,1]/ncores[-1]),'forward',
+        '%.4f'%(tdata[0,2]/tdata[-1,2]/ncores[-1]),
+        'conv','%.4f'%(tdata[0,3]/tdata[-1,3]/ncores[-1])])
     plt.xlim(0,24)
+    plt.tight_layout()
     pdb.set_trace()
     plt.savefig('img/mpiacc-%s.png'%task)
+
+def show_mpi_err():
+    task='tianhe'
+    tdata = np.loadtxt('mpiacc-%s.tbl'%task)
+    ncores, t_tots, t_fors, t_cnvs, t_mpis, accs = tdata.T
+    #plt.plot(ncores, 1./ncores/t_tots[:]*t_tots[0])
+    plt.ion()
+    plt.figure(figsize=(6,4))
+    plt.plot(ncores, accs, '-o')
+    plt.xlim(0,24)
+    plt.title('Error in 100 steps')
+    plt.xlabel('#  of cores')
+    pdb.set_trace()
+    plt.savefig('img/mpiacc-error-%s.png'%task)
+
+def show_mpiparts():
+    task='tianhe'
+    tdata = np.loadtxt('mpiacc-%s.tbl'%task)
+    ncores, t_tots, t_fors, t_cnvs, t_mpis, accs = tdata.T
+    tcals = t_tots-t_mpis
+    a, b = np.polyfit(ncores, tcals*ncores,1)  #resource = a*x+b
+    label = 'parallel = %s, sequencial = %s'%(b, a)
+
+    plt.ion()
+    plt.figure(figsize=(6,4))
+    #plt.plot(ncores, tcals, color='k')
+    #plt.plot(ncores, b/ncores)
+    #plt.plot(ncores, a*np.ones(len(ncores)))
+    #plt.plot(ncores, t_mpis)
+    plt.plot(ncores, tcals*ncores, color='k')
+    plt.plot(ncores, b*np.ones(len(ncores)))
+    plt.plot(ncores, a*ncores)
+    plt.plot(ncores, t_mpis*ncores)
+
+    plt.ylabel('Resources',fontsize=14)
+    plt.legend(['Total','Parallel','Sequencial','Transimision'])
+    plt.xlim(0,24)
+    plt.tight_layout()
+
+    pdb.set_trace()
+    plt.savefig('img/mpiacc-parts-tianhe.png')
 
 if __name__ == '__main__':
     #show_bentch44K()
     #show_bentch44dn()
     #show_kernel44K(1)
     #show_bentch44dncr()
-    show_mpiacc('tianhe')
-    #show_mpiacc('beijing')
+    show_mpiacc('delta')
+    #show_mpiparts()
+    #show_mpi_err()
