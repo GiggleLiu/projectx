@@ -8,7 +8,9 @@ from problems import load_config, pconfig
 from utils import analyse_exact
 from plotlib import scatter_vec_phase, compare_wf
 from qstate.sampler.mpiutils import RANK
+from profilehooks import profile
 
+@profile
 def run_benchmark(config, bench_id, monitors=[], folder='.'):
     '''
     Parameters:
@@ -86,7 +88,7 @@ def load_rbm(configfile, bench_id, i_iter = None):
 def main():
     from monitors import Print_eng_with_exact, print_eng, show_wf, DumpNetwork
     configfile, bench_id = sys.argv[1:]
-    np.random.seed(2)
+    np.random.seed(3)
 
     config = load_config(configfile)
     # folder to store data, containing config.py
