@@ -402,3 +402,18 @@ Fig: In above legends r for real product layer, c for complex. 2, 7, 8 are targe
 * complex product layers are stabler than real ones.
 * network - 7 (32, 64, 512, 64, 8), performance of deep and wide network is similar to shallow network - 2 (16, 128, 32), all with error $<0.1\%$, but converge slower.
 * number of features in product network is important.
+
+# Day 11 Sep
+## MPI Acceleration Test
+Number of flops on TianHe and Delta servers as a function of number of cores.
+|           TianHe           |         Delta101          |          Delta102          |
+| :------------------------: | :-----------------------: | :------------------------: |
+| ![](img/mpiacc-tianhe.png) | ![](img/mpiacc-delta.png) | ![](img/mpiacc-delta2.png) |
+The forward method of convolusion layer take >50% resources, good news.
+
+Resources spent on Parrallel/ Sequencial/ Transimission (Tian He as an example)
+![](img/mpiacc-parts-tianhe.png)
+
+Resources spent on Parrallel/ Sequencial/ Transimission (Tian He as an example)
+Error in 100 step didn't blow up.
+![](img/mpiacc-error-tianhe.png)
