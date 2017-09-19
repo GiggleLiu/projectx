@@ -444,3 +444,7 @@ Benchmark on different product input,
 ## $12$ sites, $J_2=0.8$
 
 ![](img/errl-12pJ20.8.png)
+
+Curve for energy
+
+![](img/el-12pJ20.8.png)
