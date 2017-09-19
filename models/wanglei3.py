@@ -20,7 +20,8 @@ class WangLei3(StateNN):
         :input_shape: tuple, (1, N1, N2 ...)
         :num_feature_hidden: int, number features in hidden layer.
     '''
-    def __init__(self, input_shape, num_features=[12], itype='float64',version='linear'):
+    def __init__(self, input_shape, itype, powerlist, num_features=[12],\
+            version='conv', stride=1):
         self.num_features, self.itype = num_features, itype
         nsite=np.prod(input_shape)
         eta=0.2
@@ -30,16 +31,9 @@ class WangLei3(StateNN):
         ishape = (1,)+input_shape
         self.layers.append(functions.Reshape(input_shape, itype=itype, output_shape=ishape))
 
-        stride = 1
-        if D==1:
-            powerlist = [[1,1],[1,0,1]]
-        else:
-            #powerlist = [[[1,1],[1,1]],[[1,0],[0,1]],[[0,1],[1,0]],[[1,1]],[[1],[1]],[[1,0,1]],[[1],[0],[1]]]
-            powerlist = [[[1,0],[0,1]],[[0,1],[1,0]],[[1,1]],[[1],[1]]]
-            #powerlist = [[[1,0],[0,1]],[[0,1],[1,0]],[[1,1]],[[1],[1]],[[1,0,1]],[[1],[0],[1]],[[1,1,1]]]
-        NF = len(powerlist)+1
+        NF = len(powerlist)
         plnn = ParallelNN(input_shape = ishape, output_shape=(1,NF,)+tuple([si//stride for si in ishape[1:]]), itype=itype, axis=1)
-        plnn.add_layer(functions.Reshape)
+        #plnn.add_layer(functions.Reshape)
         for power in powerlist:
             plnn.add_layer(functions.ConvProd, powers=power, boundary='P', strides=(stride,)*D)
         self.layers.append(plnn)

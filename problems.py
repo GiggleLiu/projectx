@@ -33,37 +33,40 @@ class ProbDef(object):
         #rbm.thnn.render_theta(samples)
 
         # perform measurements on operators that needed by stochastic gradient generator.
-        if RANK == 0:
-            samples_list = []
-            batch = samples.num_config//SIZE
-            idle = samples.num_config%SIZE
-            for j in range(SIZE):
-                data_list = []
-                if j<idle:
-                    sls = slice((batch+1)*j,(batch+1)*(j+1))
-                else:
-                    sls = slice(j*batch+idle,(j+1)*batch+idle)
-                if j==SIZE-1:
-                    assert((j+1)*batch+idle==samples.num_config)
-                for di in samples.data_list:
-                    data_list.append(di[sls])
-                samples_list.append(samples.__class__(samples.slots[4:], data_list))
-        else:
-            samples_list = None
-        num_sample = COMM.bcast(samples.num_sample, root=0)
-        samples = COMM.scatter(samples_list, root=0)
-        opq_vals = sr.opq.eval_on_samples(samples, rbm, update_samples=False)
-        #print('@',RANK,samples.num_sample,opq_vals)
-        opq_vals = [np.asarray(opv*samples.num_sample/num_sample) for opv in opq_vals]
-        for j in range(sr.opq.num_ops):
-            if RANK==0:
-                data = np.empty((SIZE,)+opq_vals[j].shape, dtype=opq_vals[j].dtype)
+        if SIZE>1:
+            if RANK == 0:
+                samples_list = []
+                batch = samples.num_config//SIZE
+                idle = samples.num_config%SIZE
+                for j in range(SIZE):
+                    data_list = []
+                    if j<idle:
+                        sls = slice((batch+1)*j,(batch+1)*(j+1))
+                    else:
+                        sls = slice(j*batch+idle,(j+1)*batch+idle)
+                    if j==SIZE-1:
+                        assert((j+1)*batch+idle==samples.num_config)
+                    for di in samples.data_list:
+                        data_list.append(di[sls])
+                    samples_list.append(samples.__class__(samples.slots[4:], data_list))
             else:
-                data = None
-            COMM.Gather(opq_vals[j],data,root=0)
-            if RANK==0:
-                opq_vals[j] = data.sum(axis=0)
-            COMM.Bcast(opq_vals[j],root=0)
+                samples_list = None
+            num_sample = COMM.bcast(samples.num_sample, root=0)
+            samples = COMM.scatter(samples_list, root=0)
+
+            opq_vals = sr.opq.eval_on_samples(samples, rbm, update_samples=False)
+            opq_vals = [np.asarray(opv*samples.num_sample/num_sample) for opv in opq_vals]
+            for j in range(sr.opq.num_ops):
+                if RANK==0:
+                    data = np.empty((SIZE,)+opq_vals[j].shape, dtype=opq_vals[j].dtype)
+                else:
+                    data = None
+                COMM.Gather(opq_vals[j],data,root=0)
+                if RANK==0:
+                    opq_vals[j] = data.sum(axis=0)
+                COMM.Bcast(opq_vals[j],root=0)
+        else:
+            opq_vals = sr.opq.eval_on_samples(samples, rbm, update_samples=False)
 
         # get gradient from observables
         gradient = sr.get_gradient(opq_vals)

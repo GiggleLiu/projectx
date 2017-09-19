@@ -2,7 +2,7 @@ import sys, os
 sys.path.insert(0,'../')
 from plotlib import *
 
-def show_bentch44K():
+def show_bench44K():
     ntask = 4
     token = 'K'
     plt.ion()
@@ -16,7 +16,7 @@ def show_bentch44K():
         pdb.set_trace()
         plt.savefig('img/%s-%s%s.png'%('errl' if show_err else 'el', token, ''))
 
-def show_bentch44dn():
+def show_bench44dn():
     '''Deep network.'''
     token = 'dn'
     ntask = 5
@@ -30,7 +30,7 @@ def show_bentch44dn():
         pdb.set_trace()
         plt.savefig('img/%s-%s%s.png'%('errl' if show_err else 'el', token, ''))
 
-def show_bentch44dncr():
+def show_bench44dncr():
     '''Compare complex and real.'''
     token = 'dn'
     ids = [1,6,7]
@@ -52,10 +52,10 @@ def show_bentch44dncr():
     pdb.set_trace()
     plt.savefig('img/errcr-%s.png'%token)
 
-def show_kernel44K(bentch_id):
+def show_kernel44K(bench_id):
     configfile = '../benchmarks/wanglei4K/config-sample.ini'
     plt.ion()
-    show_kernel_bentch(configfile, bentch_id = bentch_id)
+    show_kernel_bench(configfile, bench_id = bench_id)
     plt.colorbar()
     pdb.set_trace()
 
@@ -119,11 +119,66 @@ def show_mpiparts():
     pdb.set_trace()
     plt.savefig('img/mpiacc-parts-tianhe.png')
 
+def show_bench6():
+    tasks = [0,1,2,4]
+    token = '6'
+    plt.ion()
+    for show_err in [True, False]:
+        plt.cla()
+        show_el(datafiles = ['../benchmarks/wanglei6/el-%i.dat'%i for i in tasks],
+                EG = -0.503810*36,
+                legends = ['%s'%i for i in tasks],
+                show_err=show_err,
+                xlogscale=not show_err)
+        pdb.set_trace()
+        plt.savefig('img/%s-%s%s.png'%('errl' if show_err else 'el', token, ''))
+
+def show_bench8():
+    tasks = [0,1,2]
+    token = '8'
+    plt.ion()
+    for show_err in [False]:
+        plt.cla()
+        show_el(datafiles = ['../benchmarks/wanglei6/el-%i.dat'%i for i in tasks],
+                EG = -0.5*64,
+                legends = ['%s'%i for i in tasks],
+                show_err=show_err,
+                xlogscale=not show_err)
+        pdb.set_trace()
+        plt.savefig('img/%s-%s%s.png'%('errl' if show_err else 'el', token, ''))
+
+def show_benchm1(J2):
+    if J2==0.8:
+        EG = -0.426340679527*8
+    elif J2==0.0:
+        EG = -0.456386676117*8
+    elif J2==0.5:
+        EG = -0.375*8
+    else:
+        raise
+    #tasks = [0,1,2,3]
+    #tasks = [0,1,4,5,6]
+    tasks = range(7)
+    token = 'm%s'%J2
+    plt.ion()
+    for show_err in [True, False]:
+        plt.cla()
+        show_el(datafiles = ['../benchmarks/mul1dp%d/el-%i.dat'%(J2*10,i) for i in tasks],
+                EG = EG,
+                legends = ['%s'%i for i in tasks],
+                show_err=show_err,
+                xlogscale=not show_err)
+        pdb.set_trace()
+        plt.savefig('img/%s-%s%s.png'%('errl' if show_err else 'el', token, ''))
+
 if __name__ == '__main__':
-    #show_bentch44K()
-    #show_bentch44dn()
+    #show_bench44K()
+    #show_bench44dn()
     #show_kernel44K(1)
-    #show_bentch44dncr()
-    show_mpiacc('delta')
+    #show_bench44dncr()
+    #show_mpiacc('delta')
     #show_mpiparts()
     #show_mpi_err()
+    #show_bench6()
+    #show_bench8()
+    show_benchm1(0.0)

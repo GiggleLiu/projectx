@@ -33,19 +33,31 @@ class UI(object):
         '''Quick benchmark, not using mpi or nohup.'''
         self.benchmark('benchmarks/%s/config-sample.ini'%subfolder, id, interactive=True)
 
-    def bdn(self, id):
+    def bdn(self, id, interactive=False):
         '''shortcut for benchmark depth of wanglei4 model.'''
-        self.benchmark(configfile='benchmarks/wanglei4dn/config-sample.ini', id=id)
+        self.benchmark(configfile='benchmarks/wanglei4dn/config-sample.ini', id=id, interactive=interactive)
 
-    def bK(self, id):
+    def bK(self, id, interactive=False):
         '''shortcut for benchmark filter size of wanglei4 model.'''
-        self.benchmark(configfile='benchmarks/wanglei4K/config-sample.ini', id=id)
+        self.benchmark(configfile='benchmarks/wanglei4K/config-sample.ini', id=id, interactive=interactive)
 
-    def b6(self, id):
-        self.benchmark(configfile='benchmarks/wanglei6/config-sample.ini', id=id)
+    def b6(self, id, interactive=False):
+        self.benchmark(configfile='benchmarks/wanglei6/config-sample.ini', id=id, interactive=interactive)
 
-    def bmpi(self, id):
-        self.benchmark(configfile='benchmarks/mpiacc/config-sample.ini', id=id)
+    def bm18(self, id, interactive=False):
+        self.benchmark(configfile='benchmarks/mul1dp8/config-sample.ini', id=id, interactive=interactive)
+
+    def bm15(self, id, interactive=False):
+        self.benchmark(configfile='benchmarks/mul1dp5/config-sample.ini', id=id, interactive=interactive)
+
+    def bm10(self, id, interactive=False):
+        self.benchmark(configfile='benchmarks/mul1dp0/config-sample.ini', id=id, interactive=interactive)
+
+    def b12p(self, id, interactive=False):
+        self.benchmark(configfile='benchmarks/1d12p/config-sample.ini', id=id, interactive=interactive)
+
+    def bmpi(self, id, interactive=False):
+        self.benchmark(configfile='benchmarks/mpiacc/config-sample.ini', id=id, interactive=interactive)
 
     def test(self, arg1, arg2):
         print('GET: arg1 = %s, arg2 = %s'%(arg1, arg2))
