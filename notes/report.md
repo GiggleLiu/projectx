@@ -417,3 +417,30 @@ Resources spent on Parrallel/ Sequencial/ Transimission (Tian He as an example)
 Resources spent on Parrallel/ Sequencial/ Transimission (Tian He as an example)
 Error in 100 step didn't blow up.
 ![](img/mpiacc-error-tianhe.png)
+
+# Day 19 Sep
+Benchmark on different product input,
+
+* 0: raw data,
+* 1: product of 1st NN,
+* 2: product of 2nd NN,
+* 3: product of consequtive 3 sites,
+* 4: 0 + 1
+* 5: 0 + 1 + 2
+* 6: 0 + 1 + 2 +3
+
+## 8 sites, different $J_2$
+### $J_2=0.0$
+![](img/errl-8pJ20.0.png)
+
+### $J_2=0.5$
+
+![](img/errl-8pJ20.5.png)
+
+### $J_2=0.8$
+
+![](img/errl-8pJ20.8.png)
+
+## $12$ sites, $J_2=0.8$
+
+![](img/errl-12pJ20.8.png)
