@@ -21,10 +21,9 @@ class WangLei3(StateNN):
         :num_feature_hidden: int, number features in hidden layer.
     '''
     def __init__(self, input_shape, itype, powerlist, num_features=[12],\
-            version='conv', stride=1):
+            version='conv', stride=1, eta=0.2):
         self.num_features, self.itype = num_features, itype
         nsite=np.prod(input_shape)
-        eta=0.2
         super(WangLei3, self).__init__(itype, do_shape_check=False)
 
         D = len(input_shape)
