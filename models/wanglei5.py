@@ -27,8 +27,9 @@ class WangLei5(StateNN):
         :version: ['linear'|'conv'|'const-linear'],
         :stride: int, stride step in convolusion layers.
     '''
-    def __init__(self, input_shape, K=2, num_features=[4,4,4], eta0=0.2, eta1=0.2, NP=1, NC=1,
-            itype='complex128',version='linear', dtype0='complex128', dtype1='complex128', stride=None, usesum=False):
+    def __init__(self, input_shape, K=2, num_features=[4,4,4], eta0=0.2, eta1=0.2, NP=1, NC=1,\
+            itype='complex128',version='linear', dtype0='complex128', dtype1='complex128',\
+                    stride=None, usesum=False, nonlinear='x^3'):
         self.num_features, self.itype = num_features, itype
         if stride is None:
             if any([n%4!=0 for n in input_shape]):
@@ -65,12 +66,19 @@ class WangLei5(StateNN):
         self.add_layer(functions.Reshape, output_shape=(nfo,np.prod(imgsize)//stride**D))
 
         # non-linear function
-        self.add_layer(functions.Power,order=3)
+        if nonlinear=='x^3':
+            self.add_layer(functions.Power,order=3)
+        elif nonlinear=='relu':
+            self.add_layer(functions.ReLU)
+        elif nonlinear=='sinh':
+            self.add_layer(functions.Sinh)
+        else:
+            raise Exception
         self.add_layer(functions.Mean, axis=-1)
 
         # linear layers.
         if usesum:
-            self.add_layer(functions.Sum, axis=-1)
+            self.add_layer(functions.Mean, axis=-1)
         else:
             for i,(nfi, nfo) in enumerate(zip(num_features[NP+NC-1:], num_features[NP+NC:]+[1])):
                 if i!=0:
