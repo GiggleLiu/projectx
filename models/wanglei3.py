@@ -21,7 +21,7 @@ class WangLei3(StateNN):
         :num_feature_hidden: int, number features in hidden layer.
     '''
     def __init__(self, input_shape, itype, powerlist, num_features=[12],\
-            version='conv', stride=1, eta=0.2):
+            version='conv', stride=1, eta=0.2, usesum=False):
         self.num_features, self.itype = num_features, itype
         nsite=np.prod(input_shape)
         super(WangLei3, self).__init__(itype, do_shape_check=False)
@@ -54,11 +54,14 @@ class WangLei3(StateNN):
             self.add_layer(Linear, weight=np.array([[-1,-1,1,1]],dtype=itype, order='F'),
                     bias=np.zeros((1,),dtype=itype),var_mask=(0,0))
         elif version=='linear' or version=='conv':
-            for i,(nfi, nfo) in enumerate(zip(num_features, num_features[1:]+[1])):
-                if i!=0:
-                    self.add_layer(functions.ReLU)
-                self.add_layer(Linear, weight=eta*typed_randn(self.itype, (nfo, nfi)),
-                        bias=eta*typed_randn(self.itype, (nfo,)),var_mask=(1,1))
+            if usesum:
+                self.add_layer(functions.Sum, axis=-1)
+            else:
+                for i,(nfi, nfo) in enumerate(zip(num_features, num_features[1:]+[1])):
+                    if i!=0:
+                        self.add_layer(functions.ReLU)
+                    self.add_layer(Linear, weight=eta*typed_randn(self.itype, (nfo, nfi)),
+                            bias=eta*typed_randn(self.itype, (nfo,)),var_mask=(1,1))
         elif version=='rbm':
             pass
         else:

@@ -27,10 +27,9 @@ class WangLei5(StateNN):
         :version: ['linear'|'conv'|'const-linear'],
         :stride: int, stride step in convolusion layers.
     '''
-    def __init__(self, input_shape, K=2, num_features=[4,4,4], eta0=0.2, eta1=0.2,
-            itype='complex128',version='linear', dtype0='complex128', dtype1='complex128', stride=None):
+    def __init__(self, input_shape, K=2, num_features=[4,4,4], eta0=0.2, eta1=0.2, NP=1, NC=1,
+            itype='complex128',version='linear', dtype0='complex128', dtype1='complex128', stride=None, usesum=False):
         self.num_features, self.itype = num_features, itype
-        NP, NC = 2, 1
         if stride is None:
             if any([n%4!=0 for n in input_shape]):
                 stride=2
@@ -43,6 +42,7 @@ class WangLei5(StateNN):
         D = len(input_shape)
         ishape = (1,)+input_shape
         self.layers.append(functions.Reshape(input_shape, itype=itype, output_shape=ishape))
+        imgsize = self.layers[-1].output_shape[-D:]
 
         # product layers.
         dtype = dtype0
@@ -51,6 +51,7 @@ class WangLei5(StateNN):
         for nfi, nfo in zip([1]+num_features[:NP-1], num_features[:NP]):
             self.add_layer(SPConv, weight=eta*typed_randn(dtype, (nfo, nfi)+(K,)*D),
                     bias=eta*typed_randn(dtype, (nfo,)), boundary='P', strides=(stride,)*D)
+            imgsize = self.layers[-1].output_shape[-D:]
         self.add_layer(functions.Exp)
 
         # convolution layers.
@@ -58,20 +59,23 @@ class WangLei5(StateNN):
         dtype = dtype1
         stride = 1
         for nfi, nfo in zip(num_features[NP-1:NP+NC-1], num_features[NP:NP+NC]):
-            imgsize = self.layers[-1].output_shape[-D:]
             self.add_layer(SPConv, weight=eta*typed_randn(dtype, (nfo, nfi)+imgsize),
                     bias=eta*typed_randn(dtype, (nfo,)), boundary='P', strides=(stride,)*D)
-        self.add_layer(functions.Reshape, output_shape=(num_features[0], np.prod(imgsize)//stride**D))
+            imgsize = self.layers[-1].output_shape[-D:]
+        self.add_layer(functions.Reshape, output_shape=(nfo,np.prod(imgsize)//stride**D))
 
         # non-linear function
         self.add_layer(functions.Power,order=3)
         self.add_layer(functions.Mean, axis=-1)
 
         # linear layers.
-        for i,(nfi, nfo) in enumerate(zip(num_features[NP+NC-1:], num_features[NP+NC:]+[1])):
-            if i!=0:
-                self.add_layer(functions.Log2cosh)
-            self.add_layer(Linear, weight=eta*typed_randn(dtype, (nfo, nfi)),
-                    bias=eta*typed_randn(dtype, (nfo,)),var_mask=(1,1))
-        self.add_layer(functions.Reshape, output_shape=())
+        if usesum:
+            self.add_layer(functions.Sum, axis=-1)
+        else:
+            for i,(nfi, nfo) in enumerate(zip(num_features[NP+NC-1:], num_features[NP+NC:]+[1])):
+                if i!=0:
+                    self.add_layer(functions.Log2cosh)
+                self.add_layer(Linear, weight=eta*typed_randn(dtype, (nfo, nfi)),
+                        bias=eta*typed_randn(dtype, (nfo,)),var_mask=(1,1))
+            self.add_layer(functions.Reshape, output_shape=())
 
