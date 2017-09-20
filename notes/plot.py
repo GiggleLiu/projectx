@@ -159,11 +159,29 @@ def show_benchm1(J2):
     #tasks = [0,1,2,3]
     #tasks = [0,1,4,5,6]
     tasks = range(7)
-    token = 'm%s'%J2
+    token = '%dpJ2%s'%(8,J2)
     plt.ion()
     for show_err in [True, False]:
         plt.cla()
         show_el(datafiles = ['../benchmarks/mul1dp%d/el-%i.dat'%(J2*10,i) for i in tasks],
+                EG = EG,
+                legends = ['%s'%i for i in tasks],
+                show_err=show_err,
+                xlogscale=not show_err)
+        pdb.set_trace()
+        plt.savefig('img/%s-%s%s.png'%('errl' if show_err else 'el', token, ''))
+
+def show_1d12p():
+    J2 = 0.8
+    EG = -0.42424305019*12
+    #tasks = [0,1,2,3]
+    #tasks = [0,1,4,5,6]
+    tasks = range(7)
+    token = '%dpJ2%s'%(12,J2)
+    plt.ion()
+    for show_err in [True, False]:
+        plt.cla()
+        show_el(datafiles = ['../benchmarks/1d%dp/el-%i.dat'%(12,i) for i in tasks],
                 EG = EG,
                 legends = ['%s'%i for i in tasks],
                 show_err=show_err,
@@ -181,4 +199,5 @@ if __name__ == '__main__':
     #show_mpi_err()
     #show_bench6()
     #show_bench8()
-    show_benchm1(0.0)
+    show_benchm1(0.8)
+    #show_1d12p()

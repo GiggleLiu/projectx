@@ -62,6 +62,12 @@ class UI(object):
     def bw5(self, id, interactive=False):
         self.benchmark(configfile='benchmarks/wanglei5/config-sample.ini', id=id, interactive=interactive)
 
+    def b40p(self, id, mode='', interactive=False):
+        if mode=='':
+            self.benchmark(configfile='benchmarks/1d40p/config-sample.ini', id=id, interactive=interactive)
+        elif mode=='sr':
+            self.benchmark(configfile='benchmarks/1d40p_sr/config-sample.ini', id=id, interactive=interactive)
+
     def bmpi(self, id, interactive=False):
         self.benchmark(configfile='benchmarks/mpiacc/config-sample.ini', id=id, interactive=interactive)
 
