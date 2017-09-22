@@ -12,6 +12,7 @@ powerlist_list = [
         [[1],[1,1],[1,0,1]],
         [[1],[1,1],[1,0,1]],
         [[1],[1,1],[1,0,1]],
+        [[1,1],[1,0,1]],
         ]
 
 def modifyconfig_and_getnn(config, bench_id):

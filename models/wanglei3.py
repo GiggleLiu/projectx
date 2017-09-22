@@ -8,7 +8,7 @@ import pdb
 
 from qstate import StateNN
 from poornn.utils import typed_randn
-from poornn import SPConv, Linear, functions, ParallelNN
+from poornn import SPConv, Linear, functions, ParallelNN, layers
 
 __all__=['WangLei']
 
@@ -21,7 +21,7 @@ class WangLei3(StateNN):
         :num_feature_hidden: int, number features in hidden layer.
     '''
     def __init__(self, input_shape, itype, powerlist, num_features=[12],fixbias=False,
-            version='conv', stride=1, eta=0.2, usesum=False, nonlinear='x^3'):
+            version='conv', stride=1, eta=0.2, usesum=False, nonlinear='x^3',momentum=0., poly_order=10):
         self.num_features, self.itype = num_features, itype
         nsite=np.prod(input_shape)
         super(WangLei3, self).__init__(itype, do_shape_check=False)
@@ -44,18 +44,23 @@ class WangLei3(StateNN):
             stride= 1
             imgsize = self.layers[-1].output_shape[-D:]
             self.add_layer(SPConv, weight=eta*typed_randn(self.itype, (self.num_features[0], NF)+imgsize),
-                    bias=eta*typed_randn(self.itype, (num_features[0],)), boundary='P', strides=(stride,)*D)
+                    bias=(0 if fixbias else eta)*typed_randn(self.itype, (num_features[0],)), boundary='P',
+                    strides=(stride,)*D, var_mask=(1,0 if fixbias else 1))
             self.add_layer(functions.Reshape, output_shape=(num_features[0], np.prod(imgsize)//stride**D))
 
             if nonlinear=='x^3':
                 self.add_layer(functions.Power,order=3)
+            elif nonlinear=='x^5':
+                self.add_layer(functions.Power,order=5)
             elif nonlinear=='relu':
                 self.add_layer(functions.ReLU)
             elif nonlinear=='sinh':
                 self.add_layer(functions.Sinh)
+            elif nonlinear in layers.Poly.kernel_dict:
+                self.add_layer(layers.Poly, params=eta*typed_randn('complex128', (poly_order,)), kernel=nonlinear)
             else:
                 raise Exception
-            self.add_layer(functions.Mean, axis=-1)
+            self.add_layer(functions.Filter, axes=(-1,), momentum=momentum)
         if version=='const-linear': 
             self.add_layer(Linear, weight=np.array([[-1,-1,1,1]],dtype=itype, order='F'),
                     bias=np.zeros((1,),dtype=itype),var_mask=(0,0))
@@ -64,10 +69,9 @@ class WangLei3(StateNN):
                 self.add_layer(functions.Mean, axis=-1)
             else:
                 for i,(nfi, nfo) in enumerate(zip(num_features, num_features[1:]+[1])):
-                    if i!=0:
-                        self.add_layer(functions.ReLU)
                     self.add_layer(Linear, weight=eta*typed_randn(self.itype, (nfo, nfi)),
                             bias=(0 if fixbias else eta)*typed_randn(self.itype, (nfo,)),var_mask=(1,0 if fixbias else 1))
+                    #self.add_layer(layers.Poly, params=eta*typed_randn('complex128',(10,)))
         elif version=='rbm':
             pass
         else:

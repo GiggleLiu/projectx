@@ -56,6 +56,12 @@ class UI(object):
     def b12p(self, id, interactive=False):
         self.benchmark(configfile='benchmarks/1d12p/config-sample.ini', id=id, interactive=interactive)
 
+    def b16p(self, id, interactive=False):
+        self.benchmark(configfile='benchmarks/1d16p/config-sample.ini', id=id, interactive=interactive)
+
+    def b16p8(self, id, interactive=False):
+        self.benchmark(configfile='benchmarks/1d16p8/config-sample.ini', id=id, interactive=interactive)
+
     def b20p(self, id, interactive=False):
         self.benchmark(configfile='benchmarks/1d20p/config-sample.ini', id=id, interactive=interactive)
 

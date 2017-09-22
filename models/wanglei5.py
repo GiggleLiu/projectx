@@ -68,6 +68,8 @@ class WangLei5(StateNN):
         # non-linear function
         if nonlinear=='x^3':
             self.add_layer(functions.Power,order=3)
+        elif nonlinear=='x^5':
+            self.add_layer(functions.Power,order=5)
         elif nonlinear=='relu':
             self.add_layer(functions.ReLU)
         elif nonlinear=='sinh':
@@ -82,7 +84,7 @@ class WangLei5(StateNN):
         else:
             for i,(nfi, nfo) in enumerate(zip(num_features[NP+NC-1:], num_features[NP+NC:]+[1])):
                 if i!=0:
-                    self.add_layer(functions.Log2cosh)
+                    self.add_layer(functions.ReLU)
                 self.add_layer(Linear, weight=eta*typed_randn(dtype, (nfo, nfi)),
                         bias=eta*typed_randn(dtype, (nfo,)),var_mask=(1,1))
             self.add_layer(functions.Reshape, output_shape=())
