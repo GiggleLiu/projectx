@@ -4,14 +4,15 @@ import numpy as np
 powerlist_list = [
         [[1,1],[1,0,1]],
         [[1,1],[1,0,1]],
+        [[1,1],[1,0,1]],
         ]
 
 num_feature_list = [
-        [20], [20],
+        [20], [20], [20],
         ]
 
 nonlinear_list = [
-        'sinh','polynomial',
+        'sinh','polynomial', 'polynomial',
         ]
 momentum_list = [
         0,0,0,0,0,
@@ -28,4 +29,7 @@ def modifyconfig_and_getnn(config, bench_id):
             version='conv', itype='complex128', powerlist=powerlist_list[bench_id], stride=1,
             usesum=usesum_list[bench_id], nonlinear=nonlinear_list[bench_id],
             fixbias=fixbias_list[bench_id], momentum=momentum_list[bench_id], eta=0.01 if nonlinear_list[bench_id]=='sinh' else 0.1)
+    if bench_id==2:
+        print(rbm.layers[4].factorial_rescale)
+        rbm.layers[4].factorial_rescale = True
     return rbm
