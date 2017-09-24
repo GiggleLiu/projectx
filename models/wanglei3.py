@@ -10,7 +10,7 @@ from qstate import StateNN
 from poornn.utils import typed_randn
 from poornn import SPConv, Linear, functions, ParallelNN, layers
 
-__all__=['WangLei']
+__all__=['WangLei3']
 
 class WangLei3(StateNN):
     '''

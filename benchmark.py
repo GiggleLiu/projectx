@@ -95,6 +95,8 @@ def main():
     folder = os.path.dirname(configfile)
     e0 = config['hamiltonian']['EG']
 
+    import datetime
+    print(datetime.datetime.now())
     run_benchmark(config, int(bench_id),\
             monitors = [
                 Print_eng_with_exact(e0),\
