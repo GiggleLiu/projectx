@@ -71,3 +71,18 @@ def sign_func_from_vec(configs, v):
     config_inds = packnbits_pm(configs)
     d = dict(zip(config_inds, np.sign(v)))
     return lambda config: d[packnbits_pm(config)]
+
+def space_inversion(config, size, directions=None):
+    if directions is None:
+        directions = range(len(size))
+    config = config.reshape(size)
+
+    for d in directions:
+        config = config[(slice(None),)*d+(slice(None,None,-1),)]
+    return config.ravel()
+
+def translate(config, size, vec):
+    config = config.reshape(size)
+    for axis, step in enumerate(vec):
+        config = np.roll(config, -step, axis=axis)
+    return config.ravel()
