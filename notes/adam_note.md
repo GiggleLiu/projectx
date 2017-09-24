@@ -22,7 +22,7 @@ This is used to perform optimization and is one of the best optimizer at present
 
 **Algorithm:**
 
-![img](adam-algorithm.png)
+![img](img/adam-algorithm.png)
 
 So here we are:
 

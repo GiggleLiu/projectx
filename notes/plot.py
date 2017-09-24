@@ -176,7 +176,7 @@ def show_1d12p():
     EG = -0.42424305019*12
     #tasks = [0,1,2,3]
     #tasks = [0,1,4,5,6]
-    tasks = range(7)
+    tasks = range(11)
     token = '%dpJ2%s'%(12,J2)
     plt.ion()
     for show_err in [True, False]:
@@ -184,6 +184,62 @@ def show_1d12p():
         show_el(datafiles = ['../benchmarks/1d%dp/el-%i.dat'%(12,i) for i in tasks],
                 EG = EG,
                 legends = ['%s'%i for i in tasks],
+                show_err=show_err,
+                xlogscale=not show_err)
+        pdb.set_trace()
+        plt.savefig('img/%s-%s%s.png'%('errl' if show_err else 'el', token, ''))
+
+def show_1d16p(dataset='nonlinear'):
+    J2 = 0.8
+    EG = -6.78879425  # Odd parity
+    if dataset=='nonlinear':
+        tasks = [1,4,5,10,11,12,13,14,16]
+        legends = ['sinh',r'$x^3$',r'$x^5$','polynomial','legendre', 'hermite', 'chebyshev', 'laguerre','hermiteE']
+    elif dataset=='even':
+        tasks = [6,7,8]
+        legends = ['sinh',r'$x^5$','polynomial']
+        EG = -6.6889395  # Even parity
+    elif dataset=='optimizer':
+        tasks = [10,15]
+        legends = ['adam','rmsprop']
+    elif dataset=='usesum':
+        tasks = [0,1]
+        legends = ['usesum-fixbias', 'not']
+    elif dataset=='nfeature':
+        tasks = [17,10,18,19]
+        legends = [4,8,16,32]
+    elif dataset=='rate':
+        tasks = [17,20,21,22]
+        legends = [1e-2,2e-2,4e-2,8e-2]
+    else:
+        raise
+    token = '%dpJ2%s_%s'%(16,J2,dataset)
+    plt.ion()
+    for show_err in [True, False]:
+        plt.cla()
+        show_el(datafiles = ['../benchmarks/1d%dp8/el-%i.dat'%(16,i) for i in tasks],
+                EG = EG,
+                legends = legends,
+                show_err=show_err,
+                xlogscale=not show_err)
+        pdb.set_trace()
+        plt.savefig('img/%s-%s%s.png'%('errl' if show_err else 'el', token, ''))
+
+def show_1d20p(dataset=''):
+    J2 = 0.8
+    EG = -0.423063620451*20
+    if dataset=='nonlinear':
+        tasks = [1]
+        legends = ['polynomial']
+    else:
+        raise
+    token = '%dpJ2%s_%s'%(20,J2,dataset)
+    plt.ion()
+    for show_err in [True, False]:
+        plt.cla()
+        show_el(datafiles = ['../benchmarks/1d%dp/el-%i.dat'%(20,i) for i in tasks],
+                EG = EG,
+                legends = legends,
                 show_err=show_err,
                 xlogscale=not show_err)
         pdb.set_trace()
@@ -199,5 +255,12 @@ if __name__ == '__main__':
     #show_mpi_err()
     #show_bench6()
     #show_bench8()
-    show_benchm1(0.8)
+    #show_benchm1(0.8)
     #show_1d12p()
+    #show_1d16p('nonlinear')
+    #show_1d16p('even')
+    #show_1d16p('optimizer')
+    #show_1d16p('usesum')
+    #show_1d16p('nfeature')
+    #show_1d16p('rate')
+    #show_1d20p('nonlinear')

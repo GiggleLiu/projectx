@@ -448,3 +448,67 @@ Benchmark on different product input,
 Curve for energy
 
 ![](img/el-12pJ20.8.png)
+
+# Day 21 Sep
+Ground state symmetry analysis, these ground states are obtained using ED. 
+
+columns are different sizes for chain varying from $2$ to $20$, and rows are different $J_2$ varying from $0.0$ to $1.0$.
+
+Data element '-++'  means system changes sign for translate 1 site operation ($T_1$), keeps sign for spin flip ($F$) and space inversion symmetry $I$.
+
+![](img/symmetry_table.png)
+
+## Summary
+
+* $I,F$ changes sign of wave function when and only when $L/2$ is odd.
+* For $J_2<0.5$, $T_1, F, I$ are all positive for even $L/2$ and negative for odd $L/2$.
+* For $L=16$, $T_1$ have negative eigenvalue! This must be why I fail to get ground state for $N=16$. Is there a phase transition? I suspect even representation power of our Ansaz is enough to describe signn structures of $J_2=0.5$ and $J_2=0.0$, it can fail to describe sign structures for $J_2>0.5$.
+
+# Day 23 Sep
+
+## 16 Sites, $J_2=0.8$
+
+## Network
+
+![](../benchmarks/1d16p8/WangLei3-17.png)
+
+### Description
+
+* Poly layer has kernels attribute, which represents different types of polynomial expansions.
+* Filter filter out Fourier amplitude with specific momentum, equal to `Mean` when $momentum=0$.
+
+## Error vs different polynomial expansions
+
+![](img/errl-16pJ20.8_nonlinear.png)
+
+## Error vs number of feature.
+![](img/errl-16pJ20.8_nfeature.png)
+
+## Target State with $k=\pi$
+![](img/errl-16pJ20.8_even.png)
+
+## Weights of polynomials (Real Part)
+
+![](img/polyweight.png)
+
+* from wave function overlap, we see performance of pure polynomial is worst (however, using Rmsprop instead of Adam, we have ~0.996 overlap for pure polynomial expansion).
+
+*  positive-negative oscillating structure is shown in all these cases. 
+
+* The real part of these functions for $x\in[-2,2]$ are very different
+
+  ![](img/polycurve.png)
+
+# Data flow
+
+![](img/dataflow.png)
+
+This is an example, I show that after polynomial operation, we have data amplitude blowing up.
+
+
+
+## 20 Sites, $J_2=0.8$
+
+![](img/errl-20pJ20.8_nonlinear.png)
+
+$20$ features in convolution layer, polynomial kernel, optimize using Adam (0.01). 
