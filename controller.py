@@ -945,24 +945,23 @@ def analyse_psiscaling(J2, size):
     plt.legend(['$v$']+labels)
     pdb.set_trace()
 
-def analyse_poly(configfile, num_iter):
+def analyse_poly(configfile, num_iter, bench_id_list):
     config = load_config(configfile)
     # folder to store data, containing config.py
     folder = os.path.dirname(configfile)
     e0 = config['hamiltonian']['EG']
-    bench_id_list = [10,11,12,13,14,16]
     labels = ['polynomial','legendre', 'hermite', 'chebyshev', 'laguerre','hermiteE']
     legends = []
 
     sys.path.insert(0,folder)
     from config import modifyconfig_and_getnn
     plt.ion()
-    for bench_id, label in zip(bench_id_list, labels):
+    for ib,(bench_id, label) in enumerate(zip(bench_id_list, labels)):
         rbm = modifyconfig_and_getnn(config, bench_id)
 
         optimizer, problem = pconfig(config, rbm)
         h, sr, rbm, vmc = problem.hamiltonian, problem.sr, problem.rbm, problem.vmc
-        if bench_id == 10:
+        if ib == 0:
             H, e0, v0, configs = analyse_exact(h, do_printsign=False)
 
         # load data
@@ -976,7 +975,9 @@ def analyse_poly(configfile, num_iter):
         print('overlap = %s'%overlap)
 
         # show weights in conv layers.
-        polylayer = rbm.layers[4]
+        for layer in rbm.layers:
+            if hasattr(layer,'kernel_dict'):
+                polylayer = layer
         data = polylayer.get_variables()
         plt.plot(np.real(data))
         legends.append('%s (%.4f)'%(label,overlap))
@@ -985,27 +986,38 @@ def analyse_poly(configfile, num_iter):
     pdb.set_trace()
     plt.savefig('notes/img/polyweight.png')
 
-def analyse_polycurve(configfile, num_iter):
+def analyse_polycurve(configfile, num_iter, bench_id_list, show_var=False, token=''):
     config = load_config(configfile)
     # folder to store data, containing config.py
     folder = os.path.dirname(configfile)
     e0 = config['hamiltonian']['EG']
-    bench_id_list = [10,11,12,13,14,16]
-    labels = ['polynomial','legendre', 'hermite', 'chebyshev', 'laguerre','hermiteE']
     legends = []
 
     sys.path.insert(0,folder)
     from config import modifyconfig_and_getnn
     x = np.linspace(-2,2,200)
     plt.ion()
-    for bench_id, label in zip(bench_id_list, labels):
+    for bench_id in bench_id_list:
         rbm = modifyconfig_and_getnn(config, bench_id)
 
         # show weights in conv layers.
-        polylayer = rbm.layers[4]
-        data = polylayer.forward(x)
-        plt.plot(x,data.real)
-    plt.legend(labels)
-    plt.ylim(-20,20)
+        for nit in np.atleast_1d(num_iter):
+            rbm_var = np.load(folder+'/variables-%d%d.npy'%(bench_id,nit))
+            rbm.set_variables(rbm_var)
+            for layer in rbm.layers:
+                if hasattr(layer,'kernel_dict'):
+                    polylayer = layer
+                    legends.append(layer.kernel+'-%d'%nit)
+            if show_var:
+                data = polylayer.get_variables()
+                plt.plot(data.real)
+            else:
+                data = polylayer.forward(x)
+                plt.plot(x,data.real)
+    plt.legend(legends)
+    #plt.ylim(-20,20)
     pdb.set_trace()
-    plt.savefig('notes/img/polycurve.png')
+    if show_var:
+        plt.savefig('notes/img/polyvar-%s.png'%token)
+    else:
+        plt.savefig('notes/img/polycurve-%s.png'%token)

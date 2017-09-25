@@ -499,7 +499,7 @@ Data element '-++'  means system changes sign for translate 1 site operation ($T
 
   ![](img/polycurve.png)
 
-# Data flow
+# kData flow
 
 ![](img/dataflow.png)
 
@@ -512,3 +512,17 @@ This is an example, I show that after polynomial operation, we have data amplitu
 ![](img/errl-20pJ20.8_nonlinear.png)
 
 $20$ features in convolution layer, polynomial kernel, optimize using Adam (0.01). 
+
+# Day 25 Sep
+Complex activation function,
+* Sigmoid is singular at $z=(2n+1)i\pi$, its adaption is $f(x)=\frac{1}{1+e^{-\Re z}}+\frac{1}{1+e^{-\Im z}}$ (Birx 1992, Benvenuto 1992).
+* Tanh is singular at $z=(n+1/2)i\pi$, its adaption for CVNN is $f(z) = \tanh(\Re z)+i\tanh(\Im z)$ (Kechriotis 1994, Kinouchi 1995), $f(z)=\tanh(|z|)\exp(i\arg(z))$ (Hirose 1994).
+* $f(x) = \frac{z}{|z|}$
+* $f(x) = \frac{z}{c+\frac{1}{r}|z|}$ (Noest 1998)
+* $f(x) = \frac{|z|}{c+\frac{1}{r}|z|}\exp\left[i\{\arg z-\frac{1}{2^n}\sin(2^n \arg z)\}\right]$ (Kuroe 2005).
+
+Comparison can be found in Kuroe 2009.
+
+* using conformal mapping $f(z) = \frac{(\cos\theta+i\sin\theta)(z-\alpha)}{1-\bar{\alpha}z},|\alpha|<1$,
+  This function is the general conformal mapping that transform unit disk in the complex plane onto itself and also a M¨obius transformation.
+  First used by Mandic 2000 in RVNN.

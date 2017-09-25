@@ -229,15 +229,15 @@ def show_1d20p(dataset=''):
     J2 = 0.8
     EG = -0.423063620451*20
     if dataset=='nonlinear':
-        tasks = [1]
-        legends = ['polynomial']
+        tasks = [1, 3]
+        legends = ['poly','release + poly-rescaled']
     else:
         raise
     token = '%dpJ2%s_%s'%(20,J2,dataset)
     plt.ion()
     for show_err in [True, False]:
         plt.cla()
-        show_el(datafiles = ['../benchmarks/1d%dp/el-%i.dat'%(20,i) for i in tasks],
+        show_el(datafiles = ['../benchmarks/1d%dp%s/el-%i.dat'%(20,'8' if i==3 else '',i) for i in tasks],
                 EG = EG,
                 legends = legends,
                 show_err=show_err,
@@ -263,4 +263,4 @@ if __name__ == '__main__':
     #show_1d16p('usesum')
     #show_1d16p('nfeature')
     #show_1d16p('rate')
-    #show_1d20p('nonlinear')
+    show_1d20p('nonlinear')
