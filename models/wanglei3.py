@@ -21,7 +21,7 @@ class WangLei3(StateNN):
         :num_feature_hidden: int, number features in hidden layer.
     '''
     def __init__(self, input_shape, itype, powerlist, num_features=[12],fixbias=False,
-            version='conv', stride=1, eta=0.2, usesum=False, nonlinear='x^3',momentum=0., poly_order=10):
+            version='conv', stride=1, eta=0.2, usesum=False, nonlinear='x^3',momentum=0., poly_order=10, with_exp=False):
         self.num_features, self.itype = num_features, itype
         nsite=np.prod(input_shape)
         super(WangLei3, self).__init__(itype, do_shape_check=False)
@@ -56,6 +56,10 @@ class WangLei3(StateNN):
                 self.add_layer(functions.ReLU)
             elif nonlinear=='sinh':
                 self.add_layer(functions.Sinh)
+            elif nonlinear=='log2cosh':
+                self.add_layer(functions.Log2cosh)
+            elif nonlinear=='mobius':
+                self.add_layer(layers.Mobius, params = np.array([0j,1,1e20]),var_mask=[True,True,False])
             elif nonlinear in layers.Poly.kernel_dict:
                 self.add_layer(layers.Poly, params=eta*typed_randn('complex128', (poly_order,)), kernel=nonlinear, factorial_rescale=factorial_rescale)
             else:
@@ -77,5 +81,7 @@ class WangLei3(StateNN):
             pass
         else:
             raise ValueError('version %s not exist'%version)
+        if with_exp:
+            self.add_layer(functions.Exp)
         self.add_layer(functions.Reshape, output_shape=())
         self.add_layer(layers.Poly, params=eta*typed_randn('complex128', (poly_order,)), kernel=nonlinear, factorial_rescale=factorial_rescale)
