@@ -74,7 +74,7 @@ class WangLei5(StateNN):
         elif nonlinear=='sinh':
             self.add_layer(functions.Sinh)
         elif nonlinear in layers.Poly.kernel_dict:
-            self.add_layer(layers.Poly, params=eta1*typed_uniform('complex128', (poly_order,)), kernel=nonlinear)
+            self.add_layer(layers.Poly, params=eta0*typed_uniform('complex128', (poly_order,)), kernel=nonlinear)
         else:
             raise Exception
         self.add_layer(functions.Filter, axes=(-1,), momentum=momentum)

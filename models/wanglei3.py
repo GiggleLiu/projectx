@@ -57,10 +57,11 @@ class WangLei3(StateNN):
             elif nonlinear=='sinh':
                 self.add_layer(functions.Sinh)
             elif nonlinear in layers.Poly.kernel_dict:
-                self.add_layer(layers.Poly, params=eta*typed_randn('complex128', (poly_order,)), kernel=nonlinear)
+                self.add_layer(layers.Poly, params=eta*typed_randn('complex128', (poly_order,)), kernel=nonlinear, factorial_rescale=factorial_rescale)
             else:
                 raise Exception
             self.add_layer(functions.Filter, axes=(-1,), momentum=momentum)
+            self.add_layer(layers.Poly, params=eta*typed_randn('complex128', (poly_order,)), kernel=nonlinear, factorial_rescale=factorial_rescale)
         if version=='const-linear': 
             self.add_layer(Linear, weight=np.array([[-1,-1,1,1]],dtype=itype, order='F'),
                     bias=np.zeros((1,),dtype=itype),var_mask=(0,0))
@@ -77,3 +78,4 @@ class WangLei3(StateNN):
         else:
             raise ValueError('version %s not exist'%version)
         self.add_layer(functions.Reshape, output_shape=())
+        self.add_layer(layers.Poly, params=eta*typed_randn('complex128', (poly_order,)), kernel=nonlinear, factorial_rescale=factorial_rescale)
