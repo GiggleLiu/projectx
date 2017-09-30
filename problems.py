@@ -9,6 +9,7 @@ import numpy as np
 from qstate.sampler import SR, SpinConfigGenerator, VMC, hamiltonians
 from climin import RmsProp,GradientDescent,Adam
 from qstate.sampler.mpiutils import SIZE, RANK, COMM
+from utils import mvar, set_mvar_with_samples
 
 class ProbDef(object):
     def __init__(self, hamiltonian, rbm, vmc, sr, num_vmc_run, num_vmc_sample):
@@ -25,6 +26,11 @@ class ProbDef(object):
 
         # update RBM
         rbm.set_variables(x)
+        n_iter = self.cache.get('n_iter',1)
+        if np.log(n_iter)/np.log(2)==0:
+            set_mvar_with_samples(rbm, self.cache.get('samples'),learning_rate=1.)
+            self.cache['mean0'] = rbm['BN-0'].mean
+            self.cache['var0'] = rbm['BN-0'].variance
 
         # generate samples with probabilities given by this new RBM
         samples = vmc.mpi_generate_samples(self.num_vmc_run, rbm, num_sample=self.num_vmc_sample, bcast=False)

@@ -86,3 +86,31 @@ def translate(config, size, vec):
     for axis, step in enumerate(vec):
         config = np.roll(config, -step, axis=axis)
     return config.ravel()
+
+def mvar(arr, weights=1, **kwargs):
+    '''Weighted Mean and variance.'''
+    axis=kwargs.get('axis',0)
+    arr = np.asarray(arr)
+    weights = np.asarray(weights)[(slice(None),)+(None,)*(arr.ndim-axis-1)]
+    N = np.sum(weights)
+    mean = np.sum(arr*weights, **kwargs)/N
+    var = (abs(arr - mean)**2*weights).sum(**kwargs)/N
+    return mean, var
+
+def set_mvar_with_samples(rbm,samples, learning_rate=0.1):
+    '''set mean and variance using samples.'''
+    if samples is None:
+        # initialize mean and variance
+        for i,layer in enumerate(rbm.layers):
+            if hasattr(layer,'variance'):
+                layer.mean = 0.
+                layer.variance = 1.
+        return
+    yss, counts = samples.yss, samples.counts
+    for i,layer in enumerate(rbm.layers):
+        if not hasattr(layer,'variance'):
+            continue
+        di = [ys[i] for ys in yss]
+        mean, var = mvar(di, weights=counts, axis=0, keepdims=False)
+        layer.mean = mean*learning_rate+layer.mean*(1-learning_rate)
+        layer.variance = var*learning_rate+layer.variance*(1-learning_rate)

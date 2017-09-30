@@ -526,3 +526,6 @@ Comparison can be found in Kuroe 2009.
 * using conformal mapping $f(z) = \frac{(\cos\theta+i\sin\theta)(z-\alpha)}{1-\bar{\alpha}z},|\alpha|<1$,
   This function is the general conformal mapping that transform unit disk in the complex plane onto itself and also a M¨obius transformation.
   First used by Mandic 2000 in RVNN.
+
+# Day 27 Sep
+Using real networks, 16 site $J_2=0.8$ will converge to an error $\simeq 1\%$.
