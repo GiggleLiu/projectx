@@ -10,13 +10,13 @@ from plotlib import scatter_vec_phase, compare_wf
 from qstate.sampler.mpiutils import RANK
 from profilehooks import profile
 
-@profile
 def run_benchmark(config, bench_id, monitors=[], folder='.'):
     '''
     Parameters:
         :configfile: str, the location of configuration file.
         :bench_id: number/str, specify the benchmark item.
         :monitors: func, functions take (problem, optimizer) as parameters.
+        :folder: str, where to save data.
     '''
     # modification to parameters
     sys.path.insert(0,folder)
@@ -42,6 +42,7 @@ def run_benchmark(config, bench_id, monitors=[], folder='.'):
             el.append(ei)
 
         num_iter = info['n_iter']
+        problem.cache['n_iter'] = info['n_iter']
         if num_iter>=max_iter:
             break
 
