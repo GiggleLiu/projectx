@@ -529,3 +529,107 @@ Comparison can be found in Kuroe 2009.
 
 # Day 27 Sep
 Using real networks, 16 site $J_2=0.8$ will converge to an error $\simeq 1\%$.
+
+# Day 3 Oct
+## Back Propagation for Complex Variables
+The gradient for **real** cost function $J(z)$ defined on complex plane $z=x+iy$ is
+$$\begin{align}\nabla J(z) &= \frac{\partial J}{\partial x} + i\frac{\partial J}{\partial y}\\&= \frac{\partial J}{\partial z}\frac{\partial z}{\partial x}+\frac{\partial J}{\partial z^*}\frac{\partial z^*}{\partial x}+ i\left[\frac{\partial J}{\partial z}\frac{\partial z}{\partial y}+\frac{\partial J}{\partial z^*}\frac{\partial z^*}{\partial y}\right]\\&=2\frac{\partial J}{\partial z^*}=2\left(\frac{\partial J}{\partial z}\right)^*\end{align}$$
+
+In the last line, we have used the reality condition of $J$. In the following we will derive complex version of BP in order to get $\frac{\partial J}{\partial z}$ layer by layer
+
+$$\frac{\partial J}{\partial y_l}=\sum\limits_{y_{l+1}}\frac{\partial J}{\partial y_{l+1}}\frac{\partial y_{l+1}}{\partial y_l}+\frac{\partial J}{\partial y^*_{l+1}}\frac{\partial y_{l+1}^*}{\partial y_l}. $$
+
+Here, $y_l$ and $y_{l+1}$ are variables (including input nodes and network variables) in the $l$-th layer and $l+1$-th layer respectively, and $y_{l+1}=f_l(y_l)$.
+
+* If $f_l$ is **holomophic**, we have contributions from the second term vanish, we get 
+
+  $$\frac{\partial J}{\partial y_l}=\sum\limits_{y_{l+1}}\frac{\partial J}{\partial y_{l+1}}\frac{\partial y_{l+1}}{\partial y_l},$$
+
+  which is the exactly the same BP formula as for real functions except that we take its conjugate.
+
+* If $f_l$ is **non-holomophic**, we have
+
+  $$\frac{\partial J}{\partial y_l}=\sum\limits_{y_{l+1}}\frac{\partial J}{\partial y_{l+1}}\frac{\partial y_{l+1}}{\partial y_l}+\left(\frac{\partial J}{\partial y_{l+1}}\frac{\partial y_{l+1}}{\partial y_l^*}\right)^*. $$
+
+### Numerical test
+
+Given input vector $x$ of length $10$, our toy network gives output $J=f_2(f_1(f_1(x)))$ as the cost function, with $f_1(z)=z^*$ and $f_2(z)=-e^{-|z|^2}$.
+
+```python
+import numpy as np
+from matplotlib.pyplot import *
+
+f1_forward = lambda x:x.conj()
+df1_z = lambda x,y: np.zeros_like(x,dtype='complex128')
+df1_zc = lambda x,y: np.ones_like(x,dtype='complex128')
+
+f2_forward = lambda x:-np.exp(-x*x.conj())
+df2_z = lambda x,y: -y*x.conj()
+df2_zc = lambda x,y: -y*x
+
+def roger_backward(df_z,df_zc):
+    return lambda x,y,dy:df_z(x,y).conj()*dy
+
+def akira_backward(df_z,df_zc):
+    return lambda x,y,dy:df_z(x,y)*dy+df_zc(x,y).conj()*dy.conj()
+
+# the version in roger luo's thesis
+f1_backward_roger = roger_backward(df1_z,df1_zc)
+f2_backward_roger = roger_backward(df2_z,df2_zc)
+
+# the backward version in Akira's book
+f1_backward_akira = akira_backward(df1_z,df1_zc)
+f2_backward_akira = akira_backward(df2_z,df2_zc)
+
+# initial parameters, and network parameters
+num_input = 10
+a0 = np.random.randn(num_input)+1j*np.random.randn(num_input)
+num_layers = 3
+
+def forward(x):
+    yl = [x]
+    for i in range(num_layers):
+        if i==num_layers-1:
+            x=f2_forward(x)
+        else:
+            x=f1_forward(x)
+        yl.append(x)
+    return yl
+
+def backward(yl, version):  # version = 'akira' or 'roger'
+    dy = 1*np.ones(num_input, dtype='complex128')
+    for i in range(num_layers):
+        y = yl[num_layers-i]
+        x = yl[num_layers-i-1]
+        if i==0:
+            dy = eval('f2_backward_%s'%version)(x, y, dy)
+        else:
+            dy = eval('f1_backward_%s'%version)(x, y, dy)
+    return dy.conj() if version=='akira' else dy
+
+def optimize_run(version, alpha=0.1):
+    cost_histo = []
+    x = a0.copy()
+    num_run = 2000
+    for i in range(num_run):
+        yl = forward(x)
+        g_a = backward(yl, version)
+        x[:num_input] = (x-alpha*g_a)[:num_input]
+        cost_histo.append(yl[-1].sum().real)
+    return np.array(cost_histo)
+
+if __name__ == '__main__':
+    lr=0.01
+    cost_r = optimize_run('roger', lr)
+    cost_a = optimize_run('akira', lr)
+    plot(cost_r)
+    plot(cost_a)
+    legend(['Roger Luo','Akira'])
+    show()
+```
+
+**Result:**
+
+![](img/cbp.png)
+
+Only Akira's fomulation (above notes) converges to $-10$ correctly, the old holomophic version (Roger Luo & Mine version) stops working.
