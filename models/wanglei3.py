@@ -7,7 +7,7 @@ import numpy as np
 import pdb
 
 from qstate import StateNN
-from poornn.utils import typed_randn
+from poornn.utils import typed_uniform
 from poornn import SPConv, Linear, functions, ParallelNN, layers
 
 __all__=['WangLei3']
@@ -21,7 +21,8 @@ class WangLei3(StateNN):
         :num_feature_hidden: int, number features in hidden layer.
     '''
     def __init__(self, input_shape, itype, powerlist, num_features=[12],fixbias=False,
-            version='conv', stride=1, eta=0.2, usesum=False, nonlinear='x^3',momentum=0., poly_order=10, with_exp=False):
+            version='conv', stride=1, eta=0.2, usesum=False, nonlinear='x^3',momentum=0., poly_order=10, with_exp=False,
+            factorial_rescale=False, nonlinear_mask = [False,False]):
         self.num_features = num_features
         nsite=np.prod(input_shape)
 
@@ -37,13 +38,13 @@ class WangLei3(StateNN):
         self.layers.append(plnn)
         if version=='linear':
             self.add_layer(functions.Reshape, output_shape=(np.prod(self.layers[-1].output_shape),))
-            self.add_layer(Linear, weight=eta*typed_randn(self.itype, (num_features[0], self.layers[-1].output_shape[-1])),
-                    bias=(0 if fixbias else eta)*typed_randn(self.itype, (num_features[0],)),var_mask=(1,0 if fixbias else 1))
+            self.add_layer(Linear, weight=eta*typed_uniform(self.itype, (num_features[0], self.layers[-1].output_shape[-1])),
+                    bias=(0 if fixbias else eta)*typed_uniform(self.itype, (num_features[0],)),var_mask=(1,0 if fixbias else 1))
         elif version=='conv':
             stride= 1
             imgsize = self.layers[-1].output_shape[-D:]
-            self.add_layer(SPConv, weight=eta*typed_randn(self.itype, (self.num_features[0], NF)+imgsize),
-                    bias=(0 if fixbias else eta)*typed_randn(self.itype, (num_features[0],)), boundary='P',
+            self.add_layer(SPConv, weight=eta*typed_uniform(self.itype, (self.num_features[0], NF)+imgsize),
+                    bias=(0 if fixbias else eta)*typed_uniform(self.itype, (num_features[0],)), boundary='P',
                     strides=(stride,)*D, var_mask=(1,0 if fixbias else 1))
             self.add_layer(functions.Reshape, output_shape=(num_features[0], np.prod(imgsize)//stride**D))
 
@@ -58,12 +59,19 @@ class WangLei3(StateNN):
             elif nonlinear=='log2cosh':
                 self.add_layer(functions.Log2cosh)
             elif nonlinear=='mobius':
-                self.add_layer(layers.Mobius, params = np.array([0j,1,1e20]),var_mask=[True,True,False])
+                self.add_layer(layers.Mobius, params = np.array([0,1,1e20], dtype=itype),var_mask=[True,True,False])
+            elif nonlinear=='softmax':
+                self.add_layer(functions.SoftMax, axis=-1)
+            elif nonlinear=='sin':
+                self.add_layer(functions.Sin)
             elif nonlinear in layers.Poly.kernel_dict:
-                self.add_layer(layers.Poly, params=eta*typed_randn('complex128', (poly_order,)), kernel=nonlinear)
+                self.add_layer(layers.Poly, params=eta*typed_uniform(itype, (poly_order,)), kernel=nonlinear, factorial_rescale=factorial_rescale)
             else:
                 raise Exception
             self.add_layer(functions.Filter, axes=(-1,), momentum=momentum)
+            if nonlinear_mask[0]: 
+                self.add_layer(functions.Sinh, params=eta*typed_uniform(itype, (poly_order,)), kernel='legendre', factorial_rescale=factorial_rescale)
+                #self.add_layer(layers.Poly, params=eta*typed_uniform(itype, (poly_order,)), kernel='legendre', factorial_rescale=factorial_rescale)
         if version=='const-linear': 
             self.add_layer(Linear, weight=np.array([[-1,-1,1,1]],dtype=itype, order='F'),
                     bias=np.zeros((1,),dtype=itype),var_mask=(0,0))
@@ -72,9 +80,9 @@ class WangLei3(StateNN):
                 self.add_layer(functions.Mean, axis=-1)
             else:
                 for i,(nfi, nfo) in enumerate(zip(num_features, num_features[1:]+[1])):
-                    self.add_layer(Linear, weight=eta*typed_randn(self.itype, (nfo, nfi)),
-                            bias=(0 if fixbias else eta)*typed_randn(self.itype, (nfo,)),var_mask=(1,0 if fixbias else 1))
-                    #self.add_layer(layers.Poly, params=eta*typed_randn('complex128',(10,)))
+                    self.add_layer(Linear, weight=eta*typed_uniform(self.itype, (nfo, nfi)),
+                            bias=(0 if fixbias else eta)*typed_uniform(self.itype, (nfo,)),var_mask=(1,0 if fixbias else 1))
+                    #self.add_layer(layers.Poly, params=eta*typed_uniform(itype,(10,)))
         elif version=='rbm':
             pass
         else:
@@ -82,3 +90,5 @@ class WangLei3(StateNN):
         if with_exp:
             self.add_layer(functions.Exp)
         self.add_layer(functions.Reshape, output_shape=())
+        if nonlinear_mask[1]: 
+            self.add_layer(layers.Poly, params=eta*typed_uniform(itype, (poly_order,)), kernel='legendre', factorial_rescale=factorial_rescale)

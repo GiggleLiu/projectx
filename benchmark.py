@@ -10,7 +10,7 @@ from plotlib import scatter_vec_phase, compare_wf
 from qstate.sampler.mpiutils import RANK
 from profilehooks import profile
 
-def run_benchmark(config, bench_id, monitors=[], folder='.'):
+def run_benchmark(config, bench_id, monitors=[], folder='.', viz=False):
     '''
     Parameters:
         :configfile: str, the location of configuration file.
@@ -28,7 +28,7 @@ def run_benchmark(config, bench_id, monitors=[], folder='.'):
     max_iter = config['optimize']['max_iter']
 
     if RANK==0:
-        _save_net_and_show_config(rbm, config, folder, bench_id)
+        _save_net_and_show_config(rbm, config, folder, bench_id, viz)
         el=[] # to store energy
         print('\nRunning 0-th Iteration.')
 
@@ -53,10 +53,11 @@ def run_benchmark(config, bench_id, monitors=[], folder='.'):
         np.savetxt('%s/el-%s.dat'%(folder,bench_id),np.real(el))
         np.savetxt('%s/rbm-%s.dat'%(folder,bench_id),rbm.get_variables().view('float64'))
 
-def _save_net_and_show_config(rbm, config, folder, bench_id):
-    # visualize network
-    from poornn import viznn
-    viznn(rbm, filename=folder+'/%s-%s.png'%(rbm.__class__.__name__,bench_id))
+def _save_net_and_show_config(rbm, config, folder, bench_id, viz):
+    if viz:
+        # visualize network
+        from poornn import viznn
+        viznn(rbm, filename=folder+'/%s-%s.png'%(rbm.__class__.__name__,bench_id))
 
     # now flush configuration to stdout
     print('#'*20+' Configuration '+'#'*20)
@@ -102,7 +103,7 @@ def main():
             monitors = [
                 Print_eng_with_exact(e0),\
                 DumpNetwork(folder=os.path.dirname(configfile),token=bench_id,step=1000)\
-                ], folder=folder)
+                ], folder=folder, viz=False)
 
 if __name__ == '__main__':
     t0=time.time()

@@ -23,15 +23,16 @@ class WangLei6(StateNN):
         :eta0, eta1: float, variance of initial variables in product/linear layers.
         :dtype0, dtype1: str, data type of variables in product/linear layers.
         :itype: str, input data dtype.
-        :stride: int, stride step in convolusion layers.
     '''
-    def __init__(self, input_shape, powerlist=None, num_features=[4,4,4], eta0=0.2, eta1=0.2, NP=1, NC=1, K=None,\
+    def __init__(self, input_shape, nonlinear_list, powerlist=None, num_features=[4,4,4], eta0=0.2, eta1=0.2, NP=1, NC=1, K=None,\
             itype='complex128',dtype0='complex128', dtype1='complex128', momentum=0.,
-                    stride=None, usesum=False, nonlinear='x^3',poly_order=10, do_BN=True):
+                    usesum=False,poly_order=10, do_BN=False):
         if K is None:
             K=np.prod(input_shape)
         self.num_features, self.itype = num_features, itype
-        self.stride = stride
+        self.do_BN = do_BN
+        self.poly_order = poly_order
+        self.eta0, self.eta1 = eta0, eta1
         nsite=np.prod(input_shape)
         D = len(input_shape)
         ishape = (1,)+input_shape
@@ -43,33 +44,54 @@ class WangLei6(StateNN):
             nfo = len(powerlist)
             plnn = ParallelNN(axis=1)
             for power in powerlist:
-                plnn.layers.append(functions.ConvProd(ishape, itype, powers=power, boundary='P', strides=(stride,)*D))
+                plnn.layers.append(functions.ConvProd(ishape, itype, powers=power, boundary='P', strides=(1,)*D))
             self.layers.append(plnn)
         else:
             nfo = 1
 
+        inl = -1
         # product layers.
         dtype = dtype0
         eta=eta0
-        if NP!=0: self.add_layer(functions.Log)
-        for nfi, nfo in zip([nfo]+num_features[:NP-1], num_features[:NP]):
+        if NP!=0: self.add_layer(functions.Log,otype='complex128')
+        for inl in range(NP):
+            nfi, nfo = nfo, num_features[inl]
             self.add_layer(SPConv, weight=eta*typed_uniform(dtype, (nfo, nfi)+(K,)*D),
-                    bias=eta*typed_uniform(dtype, (nfo,)), boundary='P', strides=(stride,)*D)
-            input_shape = self.layers[-1].output_shape[-D:]
+                    bias=eta*typed_uniform(dtype, (nfo,)), boundary='P', strides=(1,)*D)
+            self.use_nonlinear(nonlinear_list[inl])
         if NP!=0: self.add_layer(functions.Exp)
 
         # convolution layers.
         eta=eta1
         dtype = dtype1
-        stride = 1
         for nfi, nfo in zip([nfo]+num_features[NP:NP+NC-1], num_features[NP:NP+NC]):
+            inl = inl+1
             self.add_layer(SPConv, weight=eta*typed_uniform(dtype, (nfo, nfi)+input_shape),
-                    bias=eta*typed_uniform(dtype, (nfo,)), boundary='P', strides=(stride,)*D)
-            input_shape = self.layers[-1].output_shape[-D:]
-        self.add_layer(functions.Reshape, output_shape=(nfo,np.prod(input_shape)//stride**D))
+                    bias=eta*typed_uniform(dtype, (nfo,)), boundary='P', strides=(1,)*D)
+            self.use_nonlinear(nonlinear_list[inl])
+        self.add_layer(functions.Filter, axes=(-1,), momentum=momentum)
+        inl=inl+1
+        self.use_nonlinear(nonlinear_list[inl])
 
+        # linear layers.
+        if usesum:
+            self.add_layer(functions.Mean, axis=-1)
+        else:
+            for i,(nfi, nfo) in enumerate(zip(num_features[NP+NC-1:], num_features[NP+NC:]+[1])):
+                self.add_layer(Linear, weight=eta*typed_uniform(dtype, (nfo, nfi)),
+                        bias=eta*typed_uniform(dtype, (nfo,)),var_mask=(1,1))
+                if do_BN:
+                    self.add_layer(functions.BatchNorm, axis=None, label='BN-%s'%i)
+                    self.add_layer(layers.Poly, params=np.array([0,1.],dtype=dtype1), kernel='polynomial', factorial_rescale=True)
+                inl=inl+1
+                self.use_nonlinear(nonlinear_list[inl])
+            self.add_layer(functions.Reshape, output_shape=())
+
+    def use_nonlinear(self,nonlinear):
         # non-linear function
-        if nonlinear=='x^3':
+        if nonlinear=='none':
+            pass
+        elif nonlinear=='x^3':
             self.add_layer(functions.Power,order=3)
         elif nonlinear=='x^5':
             self.add_layer(functions.Power,order=5)
@@ -77,22 +99,33 @@ class WangLei6(StateNN):
             self.add_layer(functions.ReLU)
         elif nonlinear=='sinh':
             self.add_layer(functions.Sinh)
+        elif nonlinear=='softplus':
+            self.add_layer(functions.SoftPlus)
+        elif nonlinear=='tanh':
+            self.add_layer(functions.Tanh)
+        elif nonlinear=='sin':
+            self.add_layer(functions.Sin)
+        elif nonlinear=='tan':
+            self.add_layer(functions.Tan)
+        elif nonlinear=='log2cosh':
+            self.add_layer(functions.Log2cosh)
+        elif nonlinear=='cos':
+            self.add_layer(functions.Cos)
+        elif nonlinear=='exp':
+            self.add_layer(functions.Exp)
+        elif nonlinear=='arctan':
+            self.add_layer(functions.ArcTan)
+        elif nonlinear[-2:]=='_r' and nonlinear[:-2] in layers.Poly.kernel_dict:
+            params = self.eta1*typed_uniform(self.layers[-1].otype, (self.poly_order,))
+            #var_mask=np.array([False, True]*(self.poly_order//2)+[False]*(self.poly_order%2))
+            #params[~var_mask] = 0
+            #params[var_mask]*=np.sign(params[var_mask].real)  # positive real part
+            self.add_layer(layers.Poly, params=params, kernel=nonlinear[:-2], factorial_rescale=True, var_mask=None)
         elif nonlinear in layers.Poly.kernel_dict:
-            self.add_layer(layers.Poly, params=eta1*typed_uniform('complex128', (poly_order,)), kernel=nonlinear)
+            params = self.eta1*typed_uniform(self.layers[-1].otype, (self.poly_order,))
+            #var_mask=np.array([False, True]*(self.poly_order//2)+[False]*(self.poly_order%2))
+            #params[~var_mask] = 0
+            #params[var_mask]*=np.sign(params[var_mask].real)  # positive real part
+            self.add_layer(layers.Poly, params=params, kernel=nonlinear, factorial_rescale=False, var_mask=None)
         else:
             raise Exception
-        self.add_layer(functions.Filter, axes=(-1,), momentum=momentum)
-
-        # linear layers.
-        if usesum:
-            self.add_layer(functions.Mean, axis=-1)
-        else:
-            for i,(nfi, nfo) in enumerate(zip(num_features[NP+NC-1:], num_features[NP+NC:]+[1])):
-                if do_BN:
-                    self.add_layer(functions.BatchNorm, axis=None, label='BN-%s'%i)
-                    self.add_layer(layers.Poly, params=np.array([0j,1.]), kernel='polynomial')
-                self.add_layer(functions.Sinh)
-                self.add_layer(Linear, weight=eta*typed_uniform(dtype, (nfo, nfi)),
-                        bias=eta*typed_uniform(dtype, (nfo,)),var_mask=(1,1))
-            self.add_layer(functions.Reshape, output_shape=())
-

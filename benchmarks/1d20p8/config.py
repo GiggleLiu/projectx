@@ -23,7 +23,7 @@ def modifyconfig_and_getnn(config, bench_id):
     rbm = WangLei5(input_shape=tuple(config['hamiltonian']['size']), num_features=num_feature_list[bench_id],
             itype='complex128', stride=1, K=K_list[bench_id],
             usesum=usesum_list[bench_id], nonlinear=nonlinear_list[bench_id],
-            momentum=momentum_list[bench_id], eta0=0.05,
+            momentum=momentum_list[bench_id], eta1=1e-3,
             )
     if bench_id == 3:
         print(rbm.layers[6].factorial_rescale)
