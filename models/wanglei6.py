@@ -33,19 +33,17 @@ class WangLei6(StateNN):
         self.num_features, self.itype = num_features, itype
         self.stride = stride
         nsite=np.prod(input_shape)
-        super(WangLei6, self).__init__(itype, do_shape_check=False)
-
         D = len(input_shape)
         ishape = (1,)+input_shape
-        self.layers.append(functions.Reshape(input_shape, itype=itype, output_shape=ishape))
-        imgsize = self.layers[-1].output_shape[-D:]
+
+        super(WangLei6, self).__init__(layers = [functions.Reshape(input_shape, itype=itype, output_shape=ishape)])
 
         # preprocessing
         if powerlist is not None:
             nfo = len(powerlist)
-            plnn = ParallelNN(input_shape = ishape, output_shape=(1,nfo,)+tuple([si//stride for si in ishape[1:]]), itype=itype, axis=1)
+            plnn = ParallelNN(axis=1)
             for power in powerlist:
-                plnn.add_layer(functions.ConvProd, powers=power, boundary='P', strides=(stride,)*D)
+                plnn.layers.append(functions.ConvProd(ishape, itype, powers=power, boundary='P', strides=(stride,)*D))
             self.layers.append(plnn)
         else:
             nfo = 1
@@ -57,7 +55,7 @@ class WangLei6(StateNN):
         for nfi, nfo in zip([nfo]+num_features[:NP-1], num_features[:NP]):
             self.add_layer(SPConv, weight=eta*typed_uniform(dtype, (nfo, nfi)+(K,)*D),
                     bias=eta*typed_uniform(dtype, (nfo,)), boundary='P', strides=(stride,)*D)
-            imgsize = self.layers[-1].output_shape[-D:]
+            input_shape = self.layers[-1].output_shape[-D:]
         if NP!=0: self.add_layer(functions.Exp)
 
         # convolution layers.
@@ -65,10 +63,10 @@ class WangLei6(StateNN):
         dtype = dtype1
         stride = 1
         for nfi, nfo in zip([nfo]+num_features[NP:NP+NC-1], num_features[NP:NP+NC]):
-            self.add_layer(SPConv, weight=eta*typed_uniform(dtype, (nfo, nfi)+imgsize),
+            self.add_layer(SPConv, weight=eta*typed_uniform(dtype, (nfo, nfi)+input_shape),
                     bias=eta*typed_uniform(dtype, (nfo,)), boundary='P', strides=(stride,)*D)
-            imgsize = self.layers[-1].output_shape[-D:]
-        self.add_layer(functions.Reshape, output_shape=(nfo,np.prod(imgsize)//stride**D))
+            input_shape = self.layers[-1].output_shape[-D:]
+        self.add_layer(functions.Reshape, output_shape=(nfo,np.prod(input_shape)//stride**D))
 
         # non-linear function
         if nonlinear=='x^3':

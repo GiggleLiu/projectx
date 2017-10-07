@@ -22,19 +22,18 @@ class WangLei3(StateNN):
     '''
     def __init__(self, input_shape, itype, powerlist, num_features=[12],fixbias=False,
             version='conv', stride=1, eta=0.2, usesum=False, nonlinear='x^3',momentum=0., poly_order=10, with_exp=False):
-        self.num_features, self.itype = num_features, itype
+        self.num_features = num_features
         nsite=np.prod(input_shape)
-        super(WangLei3, self).__init__(itype, do_shape_check=False)
 
         D = len(input_shape)
         ishape = (1,)+input_shape
-        self.layers.append(functions.Reshape(input_shape, itype=itype, output_shape=ishape))
+        super(WangLei3, self).__init__(layers = [functions.Reshape(input_shape, itype=itype, output_shape=ishape)])
 
         NF = len(powerlist)
-        plnn = ParallelNN(input_shape = ishape, output_shape=(1,NF,)+tuple([si//stride for si in ishape[1:]]), itype=itype, axis=1)
-        #plnn.add_layer(functions.Reshape)
+        plnn = ParallelNN(axis=1)
         for power in powerlist:
-            plnn.add_layer(functions.ConvProd, powers=power, boundary='P', strides=(stride,)*D)
+            plnn.layers.append(functions.ConvProd(input_shape = ishape, itype=itype,
+                powers=power, boundary='P', strides=(stride,)*D))
         self.layers.append(plnn)
         if version=='linear':
             self.add_layer(functions.Reshape, output_shape=(np.prod(self.layers[-1].output_shape),))

@@ -1,4 +1,4 @@
-#Day 15 Aug
+Day 15 Aug
 
 ## Wave function
 
@@ -528,24 +528,35 @@ Comparison can be found in Kuroe 2009.
   First used by Mandic 2000 in RVNN.
 
 # Day 27 Sep
-Using real networks, 16 site $J_2=0.8$ will converge to an error $\simeq 1\%$.
+
+Using real networks, 16 site $J_2=0.8$ will converge to an error $\simeq 1.5\%$. it's Complex counterpart is $\simeq0.1\%$.
+
+Bethe Ansatz for Heisenberg model, $|\Psi\rangle=\sum\limits_{1\leq n_1\leq \ldots\leq n_r\leq N}f(n_1,\ldots,n_r)|n_1,\ldots,n_r\rangle$, with $C_N^r$ terms.
+
+$$f(n_1,\ldots,n_2)=\sum_{\mathcal{P}\in S_r}\exp(i\sum\limits_{i=1}^r k_{\mathcal{P}_j}n_j+\frac{i}{2}\sum_{l<j}\theta_{\mathcal{P_l\mathcal{P}_j}})$$
+
+here, $r$ is the number of particles (magnon with spin $\downarrow$), $n_i$ is the position of $i$-th particle, $k_i$ is the quasi-momenta of $i$-th particle. $\mathcal{P}\in S_r$ is over all $r!$ permutations of labels ${1,2,\ldots,r}$. $\theta_{jl}=-\theta_{lj}$ is the scattering phase for each $(k_l,k_j)$ pair. By applying eigenstate condition, we have
+
+$$e^{i\theta_{jl}}=-\frac{e^{i(k_j+k_l)}+1-2e^{ik_j}}{e^{i(k_j+k_l)}+1-2e^{ik_l}}$$
+
+which can be casted in real form as $$2\cot \frac{\theta_{jl}}{2}=\cot\frac{k_j}{2}-\cot\frac{k_l}{2}$$
 
 # Day 3 Oct
 ## Back Propagation for Complex Variables
 The gradient for **real** cost function $J(z)$ defined on complex plane $z=x+iy$ is
 $$\begin{align}\nabla J(z) &= \frac{\partial J}{\partial x} + i\frac{\partial J}{\partial y}\\&= \frac{\partial J}{\partial z}\frac{\partial z}{\partial x}+\frac{\partial J}{\partial z^*}\frac{\partial z^*}{\partial x}+ i\left[\frac{\partial J}{\partial z}\frac{\partial z}{\partial y}+\frac{\partial J}{\partial z^*}\frac{\partial z^*}{\partial y}\right]\\&=2\frac{\partial J}{\partial z^*}=2\left(\frac{\partial J}{\partial z}\right)^*\end{align}$$
 
-In the last line, we have used the reality condition of $J$. In the following we will derive complex version of BP in order to get $\frac{\partial J}{\partial z}$ layer by layer
+In the last line, we have used the reality of $J$. In the following complex version of BP will be derived in order to get $\frac{\partial J}{\partial z}$ layer by layer
 
 $$\frac{\partial J}{\partial y_l}=\sum\limits_{y_{l+1}}\frac{\partial J}{\partial y_{l+1}}\frac{\partial y_{l+1}}{\partial y_l}+\frac{\partial J}{\partial y^*_{l+1}}\frac{\partial y_{l+1}^*}{\partial y_l}. $$
 
 Here, $y_l$ and $y_{l+1}$ are variables (including input nodes and network variables) in the $l$-th layer and $l+1$-th layer respectively, and $y_{l+1}=f_l(y_l)$.
 
-* If $f_l$ is **holomophic**, we have contributions from the second term vanish, we get 
+* If $f_l$ is **holomophic**, we have contributions from the second term vanish, thus
 
   $$\frac{\partial J}{\partial y_l}=\sum\limits_{y_{l+1}}\frac{\partial J}{\partial y_{l+1}}\frac{\partial y_{l+1}}{\partial y_l},$$
 
-  which is the exactly the same BP formula as for real functions except that we take its conjugate.
+  which is the exactly the same BP formula as for real functions except here we take its conjugate.
 
 * If $f_l$ is **non-holomophic**, we have
 
@@ -632,4 +643,26 @@ if __name__ == '__main__':
 
 ![](img/cbp.png)
 
-Only Akira's fomulation (above notes) converges to $-10$ correctly, the old holomophic version (Roger Luo & Mine version) stops working.
+Only Akira's fomulation (above notes) converges to $-10$ correctly, the old holomophic version (Roger Luo & GiggleLiu's version) are incorrect.
+
+## A table of complex activation functions
+|                 Function                 |                    BP                    | Notes                                    |
+| :--------------------------------------: | :--------------------------------------: | ---------------------------------------- |
+|                 $\Re[x]$                 |         $\delta_x=\Re[\delta_y]$         |                                          |
+|                 $\Im[x]$                 |        $\delta_x=-i\Re[\delta_y]$        |                                          |
+|                  $x^*$                   |          $\delta_x=\delta_y^*$           |                                          |
+|                 $|x|^2$                  |       $\delta_x=2\Re[\delta_y]x^*$       | Following E.q. A                         |
+|                  $|x|$                   |       $\delta_x=\Re[\delta_y]s^*$        | $s\equiv e^{i\arg(x)}$ denote the sign part. |
+|      $\arg (x)\equiv-i\log(x/|x|)$       |   $\delta_x=\frac{-i}{x}\Re[\delta_y]$   |                                          |
+|            $s=\frac{x}{|x|}$             | $\delta_x=\frac{s^*}{|x|}i\Im[s\delta_y]$ | Noest 1988                               |
+| ${\rm relu}(x)=\begin{cases}x, &\Re[x]>0\land\Im[x]>0\\\Re[x],&\Re[x]>0\land\Im[x]<0\\\Im[x],&\Re[x]<0\land\Im[x]>0\\0,&\Re[x]<0\land\Im[x]<0\end{cases}$ | $\delta_x=\begin{cases}\delta_y, &\Re[x]>0\land\Im[x]>0\\\Re[\delta_y],&\Re[x]>0\land\Im[x]<0\\-i\Re[\delta_y],&\Re[x]<0\land\Im[x]>0\\0,&\Re[x]<0\land\Im[x]<0\end{cases}$ |                                          |
+|                 $h(|x|)$                 | $\delta_x=\Re[\delta_y]\frac{x^*}{|x|}\frac{\partial h}{\partial|x|}$ | - E.q. A                                 |
+|           $h(x,x^*), h\in\Re$            | $\delta_x=2\frac{\partial h}{\partial x}\delta_y$ | - E.q. E, $\delta_y$ is assumed real, because real node can not have complex gradient if the cost is real too. |
+|        $h(x,x^*)\cdot s, h\in\Re$        | $\delta_x=2\frac{\partial h}{\partial x}\Re[s\delta_y]+\frac{hs^*}{|x|}i\Im[s\delta_y]$ | - E.q. B                                 |
+|        $h(|x|,w)\cdot s, h\in\Re$        | $\delta_x=\frac{\partial h}{\partial |x|}s^*\Re[s\delta_y]+\frac{h}{|x|}s^*i\Im[s\delta_y]\\\delta_w=\frac{\partial h}{\partial w}\Re[s\delta_y]$ | - E.q. C, $w$ is assumed real.           |
+|                  $Wx+b$                  | $\delta_x=\delta_y^T W\\\delta_W=\delta_y^T \delta_x\\\delta_b=\delta_y$ |                                          |
+| $h(\Re[x],w_h)+ig(\Im[x],w_g)$, $h,g,w_h,w_g\in \Re$ | $\delta_x=\frac{\partial h}{\partial\Re[x]}\Re[\delta_y]+i\frac{\partial g}{\partial \Im[x]}\Im[\delta_y]\\\delta_{w_h}=\frac{\partial h}{\partial\Re[x]}\Re[\delta_y]\\\delta_{w_g}=-\frac{\partial g}{\partial\Im[x]}\Im[\delta_y]$ | - E.q. D, e.g. $h=g=\sigma$ (Birx 1992),  $h=g=\tanh$ (Kechriotis 1994), $h=g=\frac{x}{c+x/r}$ (Kuroe 2005) |
+|           $\tanh (|x|)\cdot s$           | $\delta_x={\rm sech}(|x|)^2s^*\Re[s\delta_y]+\frac{\tanh(|x|)}{|x|}s^*i\Im[s\delta_y]$ | Hirose 1994 (Following E.q. C)           |
+|           $\frac{x}{c+|x|/r}$            | $\delta_x=\frac{c\delta_y+\frac{x^*}{r}i\Im[s\delta_y]}{(c+|x|/r)^2}$ | Georgiou 1992 (Following E.q. C)         |
+| Conformal: $\frac{e^{i\theta}(x-\alpha)}{1-\alpha^* x}$ |                holomophic                | $θ$ is a rotation angle, $α$ is a complex constant with $|α| < 1$ (Clarke 1990) |
+|       Mobius: $\frac{ax+b}{cx+d}$        |                holomophic                | $a, b, c, d ∈ \mathbb{C}$ and $ad − bc = 1$ (Mandic 2000) |

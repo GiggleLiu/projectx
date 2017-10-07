@@ -27,7 +27,7 @@ class ProbDef(object):
         # update RBM
         rbm.set_variables(x)
         n_iter = self.cache.get('n_iter',1)
-        if np.log(n_iter)/np.log(2)==0:
+        if np.log(n_iter)/np.log(2)==0 and hasattr(rbm,'do_BN') and rbm.do_BN:
             set_mvar_with_samples(rbm, self.cache.get('samples'),learning_rate=1.)
             self.cache['mean0'] = rbm['BN-0'].mean
             self.cache['var0'] = rbm['BN-0'].variance
