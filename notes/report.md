@@ -661,8 +661,37 @@ Only Akira's fomulation (above notes) converges to $-10$ correctly, the old holo
 |        $h(x,x^*)\cdot s, h\in\Re$        | $\delta_x=2\frac{\partial h}{\partial x}\Re[s\delta_y]+\frac{hs^*}{|x|}i\Im[s\delta_y]$ | - E.q. B                                 |
 |        $h(|x|,w)\cdot s, h\in\Re$        | $\delta_x=\frac{\partial h}{\partial |x|}s^*\Re[s\delta_y]+\frac{h}{|x|}s^*i\Im[s\delta_y]\\\delta_w=\frac{\partial h}{\partial w}\Re[s\delta_y]$ | - E.q. C, $w$ is assumed real.           |
 |                  $Wx+b$                  | $\delta_x=\delta_y^T W\\\delta_W=\delta_y^T \delta_x\\\delta_b=\delta_y$ |                                          |
+| Gaussian: $\frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{|x|^2}{2\sigma^2}}, \sigma\in\Re$ | $\delta_x = -\frac{(x-\mu)^*y}{\sigma^2}\delta_y\\\delta_\mu=\frac{\Re[x-\mu]y}{\sigma^2}\delta_y\\\delta_\sigma=\frac{|x-\mu|^2-\sigma^2}{\sigma^3}y\delta_y$ | Following E.q. C                         |
 | $h(\Re[x],w_h)+ig(\Im[x],w_g)$, $h,g,w_h,w_g\in \Re$ | $\delta_x=\frac{\partial h}{\partial\Re[x]}\Re[\delta_y]+i\frac{\partial g}{\partial \Im[x]}\Im[\delta_y]\\\delta_{w_h}=\frac{\partial h}{\partial\Re[x]}\Re[\delta_y]\\\delta_{w_g}=-\frac{\partial g}{\partial\Im[x]}\Im[\delta_y]$ | - E.q. D, e.g. $h=g=\sigma$ (Birx 1992),  $h=g=\tanh$ (Kechriotis 1994), $h=g=\frac{x}{c+x/r}$ (Kuroe 2005) |
 |           $\tanh (|x|)\cdot s$           | $\delta_x={\rm sech}(|x|)^2s^*\Re[s\delta_y]+\frac{\tanh(|x|)}{|x|}s^*i\Im[s\delta_y]$ | Hirose 1994 (Following E.q. C)           |
 |           $\frac{x}{c+|x|/r}$            | $\delta_x=\frac{c\delta_y+\frac{x^*}{r}i\Im[s\delta_y]}{(c+|x|/r)^2}$ | Georgiou 1992 (Following E.q. C)         |
 | Conformal: $\frac{e^{i\theta}(x-\alpha)}{1-\alpha^* x}$ |                holomophic                | $θ$ is a rotation angle, $α$ is a complex constant with $|α| < 1$ (Clarke 1990) |
 |       Mobius: $\frac{ax+b}{cx+d}$        |                holomophic                | $a, b, c, d ∈ \mathbb{C}$ and $ad − bc = 1$ (Mandic 2000) |
+
+# Day 16 Oct
+## Exponentialized variables
+
+Make a replacement $J(W,x)\rightarrow J(e^w,x)$.
+
+We have the new update rule $W^{(k+1)}=W-\alpha\frac{\partial J}{\partial W}$,
+
+Using $\frac{\partial J}{\partial W}=\frac{1}{W}\frac{\partial J}{\partial w}$ , we have 
+
+$$\begin{align}\delta w^{(k+1)}&=\log(W^{(k+1)})-\log(W)\\&=\log(1-\frac{\alpha}{W}\frac{\partial J}{\partial W})\\&=\log(1-\frac{\alpha}{W^2}\frac{\partial J}{\partial w})\\&\simeq-\alpha W^{-2}\frac{\partial J}{\partial w}\end{align}$$
+
+In comparison with traditional update rule, it is scaled by a factor of $e^{-2w}$.
+
+## Full Capacity Unitary Layer
+The gradient in the Stiefel manifold of the loss function $J(Wx)$ with respect to $W$ is $AW$,
+where $x\in \mathbb{R}^n, W\in \mathbb{R}^{p\times n}(p\leq n)$ and $A$ is a skew hermitian matrix that $A^\dagger = -A$.
+Let $y=Wx$ and $G=\frac{\partial J}{\partial y^*}$, we have $A=GW^\dagger-WG^\dagger$.
+
+To ensure the updated matrix being unitary, we use the Cayley transformation of $A$. The following update rule is obtained
+
+$$W^{(k+1)}=(\mathbb{1}+\frac{\alpha}{2}A)^{-1}(\mathbb{1}-\frac{\alpha}{2}A)W^{(k)}$$
+
+#### References
+
+* Glasser, I., Pancotti, N., August, M., Rodriguez, I. D., & Cirac, J. I. (2017). Neural Networks Quantum States, String-Bond States and chiral topological states, 1–15. Retrieved from http://arxiv.org/abs/1710.04045
+* Wisdom, S., Powers, T., Hershey, J. R., Roux, J. Le, & Atlas, L. (2016). Full-Capacity Unitary Recurrent Neural Networks, (Nips), 1–9.
+
