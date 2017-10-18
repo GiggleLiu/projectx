@@ -695,3 +695,85 @@ $$W^{(k+1)}=(\mathbb{1}+\frac{\alpha}{2}A)^{-1}(\mathbb{1}-\frac{\alpha}{2}A)W^{
 * Glasser, I., Pancotti, N., August, M., Rodriguez, I. D., & Cirac, J. I. (2017). Neural Networks Quantum States, String-Bond States and chiral topological states, 1–15. Retrieved from http://arxiv.org/abs/1710.04045
 * Wisdom, S., Powers, T., Hershey, J. R., Roux, J. Le, & Atlas, L. (2016). Full-Capacity Unitary Recurrent Neural Networks, (Nips), 1–9.
 
+
+# Day 18 Otc
+
+Numerical test for the effect of exponentialized parameters
+
+```python
+import numpy as np
+
+from poornn import functions, Linear, ANN
+from poornn.utils import typed_randn
+
+def test_softgrad():
+    net = ANN()
+    nfo = 10
+    nfi = 11
+    num_batch = 6
+    alpha = 1e-2
+    itype = dtype = 'complex128'
+    weight_shape = (nfo, nfi)
+    input_shape = (num_batch, nfi)
+
+    # generate weights
+    # notice weight = Exp(raw_weight), raw_weight = Log(weight)
+    raw_weight = typed_randn(dtype, weight_shape)
+    weight = functions.Exp.forward(raw_weight)
+
+    # define feed forward network
+    ll = Linear(input_shape = input_shape, itype = itype, weight = weight.copy(), bias = np.zeros(nfo,dtype=dtype), var_mask=(True,False))
+    net.layers.append(ll)
+    net.add_layer(functions.Reshape,output_shape=(nfo*num_batch,))
+    net.add_layer(functions.Mean,axis=0)
+    net.add_layer(functions.Abs2)
+
+    x =  typed_randn(itype, input_shape)
+    data_cache = {}
+    print('The network looks like:\n%s'%net)
+    y = net.forward(x, data_cache = data_cache)
+
+    # 1 - the soften gradient, change dw is applied on weight, so raw_weight is effectively changed by
+    # dw*(\partial raw_weight/\partial weight).
+    dw, dx = net.backward((x, y), dy=np.array(-alpha), data_cache = data_cache)
+    dw = dw.reshape(weight.shape, order='F')
+    _, dw_raw_soften = functions.Log.backward((weight, raw_weight), dy=dw)
+
+    # 2 - the raw gradient, dw_raw is changed if change raw_weight directly.
+    _, dw_raw = functions.Exp.backward((raw_weight, weight), dy=dw)
+
+    ratio = (dw_raw/weight**2)/dw_raw_soften
+    print('Ratio between exact gradient and theoretical expectation:\nmean = %s, variance = %s'%(ratio.mean(), np.var(ratio)))
+    assert(np.allclose(ratio, 1, rtol=1e-3))
+
+    # numerical differentiation test
+    raw_weight_A = raw_weight + dw_raw/weight**2  # the version we will adopt
+    weight_A = functions.Exp.forward(raw_weight_A)
+    ll.set_variables(weight_A.ravel(order='F'))
+    y_A = net.forward(x)
+    dA = y_A - y
+
+    weight_B = weight + dw   # the version used by Cirac
+    ll.set_variables(weight_B.ravel(order='F'))
+    y_B = net.forward(x)
+    dB = y_B - y
+    assert(abs(dA/dB - 1)<1e-2)
+
+if __name__ == '__main__':
+    test_softgrad()
+```
+
+A Typical Result:
+```
+The network looks like:
+<ANN|z>: (6, 11)|z -> ()|d
+    <Linear|z>: (6, 11)|z -> (6, 10)|z
+      - var_mask = (True, False)
+      - is_unitary = False
+    <Reshape|z>: (6, 10)|z -> (60,)|z
+    <Mean|z>: (60,)|z -> ()|z
+      - axis = 0
+    <Abs2|z>: ()|z -> ()|d
+Ratio between exact gradient and theoretical expectation:
+mean = (1+5.45780473214e-18j), variance = 4.06108093926e-32
+```
