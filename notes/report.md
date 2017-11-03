@@ -661,8 +661,119 @@ Only Akira's fomulation (above notes) converges to $-10$ correctly, the old holo
 |        $h(x,x^*)\cdot s, h\in\Re$        | $\delta_x=2\frac{\partial h}{\partial x}\Re[s\delta_y]+\frac{hs^*}{|x|}i\Im[s\delta_y]$ | - E.q. B                                 |
 |        $h(|x|,w)\cdot s, h\in\Re$        | $\delta_x=\frac{\partial h}{\partial |x|}s^*\Re[s\delta_y]+\frac{h}{|x|}s^*i\Im[s\delta_y]\\\delta_w=\frac{\partial h}{\partial w}\Re[s\delta_y]$ | - E.q. C, $w$ is assumed real.           |
 |                  $Wx+b$                  | $\delta_x=\delta_y^T W\\\delta_W=\delta_y^T \delta_x\\\delta_b=\delta_y$ |                                          |
+| Gaussian: $\frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{|x|^2}{2\sigma^2}}, \sigma\in\Re$ | $\delta_x = -\frac{(x-\mu)^*y}{\sigma^2}\delta_y\\\delta_\mu=\frac{\Re[x-\mu]y}{\sigma^2}\delta_y\\\delta_\sigma=\frac{|x-\mu|^2-\sigma^2}{\sigma^3}y\delta_y$ | Following E.q. C                         |
 | $h(\Re[x],w_h)+ig(\Im[x],w_g)$, $h,g,w_h,w_g\in \Re$ | $\delta_x=\frac{\partial h}{\partial\Re[x]}\Re[\delta_y]+i\frac{\partial g}{\partial \Im[x]}\Im[\delta_y]\\\delta_{w_h}=\frac{\partial h}{\partial\Re[x]}\Re[\delta_y]\\\delta_{w_g}=-\frac{\partial g}{\partial\Im[x]}\Im[\delta_y]$ | - E.q. D, e.g. $h=g=\sigma$ (Birx 1992),  $h=g=\tanh$ (Kechriotis 1994), $h=g=\frac{x}{c+x/r}$ (Kuroe 2005) |
 |           $\tanh (|x|)\cdot s$           | $\delta_x={\rm sech}(|x|)^2s^*\Re[s\delta_y]+\frac{\tanh(|x|)}{|x|}s^*i\Im[s\delta_y]$ | Hirose 1994 (Following E.q. C)           |
 |           $\frac{x}{c+|x|/r}$            | $\delta_x=\frac{c\delta_y+\frac{x^*}{r}i\Im[s\delta_y]}{(c+|x|/r)^2}$ | Georgiou 1992 (Following E.q. C)         |
 | Conformal: $\frac{e^{i\theta}(x-\alpha)}{1-\alpha^* x}$ |                holomophic                | $θ$ is a rotation angle, $α$ is a complex constant with $|α| < 1$ (Clarke 1990) |
 |       Mobius: $\frac{ax+b}{cx+d}$        |                holomophic                | $a, b, c, d ∈ \mathbb{C}$ and $ad − bc = 1$ (Mandic 2000) |
+
+# Day 16 Oct
+## Exponentialized variables
+
+Make a replacement $J(W,x)\rightarrow J(e^w,x)$.
+
+We have the new update rule $W^{(k+1)}=W-\alpha\frac{\partial J}{\partial W}$,
+
+Using $\frac{\partial J}{\partial W}=\frac{1}{W}\frac{\partial J}{\partial w}$ , we have 
+
+$$\begin{align}\delta w^{(k+1)}&=\log(W^{(k+1)})-\log(W)\\&=\log(1-\frac{\alpha}{W}\frac{\partial J}{\partial W})\\&=\log(1-\frac{\alpha}{W^2}\frac{\partial J}{\partial w})\\&\simeq-\alpha W^{-2}\frac{\partial J}{\partial w}\end{align}$$
+
+In comparison with traditional update rule, it is scaled by a factor of $e^{-2w}$.
+
+## Full Capacity Unitary Layer
+The gradient in the Stiefel manifold of the loss function $J(Wx)$ with respect to $W$ is $AW$,
+where $x\in \mathbb{R}^n, W\in \mathbb{R}^{p\times n}(p\leq n)$ and $A$ is a skew hermitian matrix that $A^\dagger = -A$.
+Let $y=Wx$ and $G=\frac{\partial J}{\partial y^*}$, we have $A=GW^\dagger-WG^\dagger$.
+
+To ensure the updated matrix being unitary, we use the Cayley transformation of $A$. The following update rule is obtained
+
+$$W^{(k+1)}=(\mathbb{1}+\frac{\alpha}{2}A)^{-1}(\mathbb{1}-\frac{\alpha}{2}A)W^{(k)}$$
+
+#### References
+
+* Glasser, I., Pancotti, N., August, M., Rodriguez, I. D., & Cirac, J. I. (2017). Neural Networks Quantum States, String-Bond States and chiral topological states, 1–15. Retrieved from http://arxiv.org/abs/1710.04045
+* Wisdom, S., Powers, T., Hershey, J. R., Roux, J. Le, & Atlas, L. (2016). Full-Capacity Unitary Recurrent Neural Networks, (Nips), 1–9.
+
+
+# Day 18 Otc
+
+Numerical test for the effect of exponentialized parameters
+
+```python
+import numpy as np
+
+from poornn import functions, Linear, ANN
+from poornn.utils import typed_randn
+
+def test_softgrad():
+    net = ANN()
+    nfo = 10
+    nfi = 11
+    num_batch = 6
+    alpha = 1e-2
+    itype = dtype = 'complex128'
+    weight_shape = (nfo, nfi)
+    input_shape = (num_batch, nfi)
+
+    # generate weights
+    # notice weight = Exp(raw_weight), raw_weight = Log(weight)
+    raw_weight = typed_randn(dtype, weight_shape)
+    weight = functions.Exp.forward(raw_weight)
+
+    # define feed forward network
+    ll = Linear(input_shape = input_shape, itype = itype, weight = weight.copy(), bias = np.zeros(nfo,dtype=dtype), var_mask=(True,False))
+    net.layers.append(ll)
+    net.add_layer(functions.Reshape,output_shape=(nfo*num_batch,))
+    net.add_layer(functions.Mean,axis=0)
+    net.add_layer(functions.Abs2)
+
+    x =  typed_randn(itype, input_shape)
+    data_cache = {}
+    print('The network looks like:\n%s'%net)
+    y = net.forward(x, data_cache = data_cache)
+
+    # 1 - the soften gradient, change dw is applied on weight, so raw_weight is effectively changed by
+    # dw*(\partial raw_weight/\partial weight).
+    dw, dx = net.backward((x, y), dy=np.array(-alpha), data_cache = data_cache)
+    dw = dw.reshape(weight.shape, order='F')
+    _, dw_raw_soften = functions.Log.backward((weight, raw_weight), dy=dw)
+
+    # 2 - the raw gradient, dw_raw is changed if change raw_weight directly.
+    _, dw_raw = functions.Exp.backward((raw_weight, weight), dy=dw)
+
+    ratio = (dw_raw/weight**2)/dw_raw_soften
+    print('Ratio between exact gradient and theoretical expectation:\nmean = %s, variance = %s'%(ratio.mean(), np.var(ratio)))
+    assert(np.allclose(ratio, 1, rtol=1e-3))
+
+    # numerical differentiation test
+    raw_weight_A = raw_weight + dw_raw/weight**2  # the version we will adopt
+    weight_A = functions.Exp.forward(raw_weight_A)
+    ll.set_variables(weight_A.ravel(order='F'))
+    y_A = net.forward(x)
+    dA = y_A - y
+
+    weight_B = weight + dw   # the version used by Cirac
+    ll.set_variables(weight_B.ravel(order='F'))
+    y_B = net.forward(x)
+    dB = y_B - y
+    assert(abs(dA/dB - 1)<1e-2)
+
+if __name__ == '__main__':
+    test_softgrad()
+```
+
+A Typical Result:
+```
+The network looks like:
+<ANN|z>: (6, 11)|z -> ()|d
+    <Linear|z>: (6, 11)|z -> (6, 10)|z
+      - var_mask = (True, False)
+      - is_unitary = False
+    <Reshape|z>: (6, 10)|z -> (60,)|z
+    <Mean|z>: (60,)|z -> ()|z
+      - axis = 0
+    <Abs2|z>: ()|z -> ()|d
+Ratio between exact gradient and theoretical expectation:
+mean = (1+5.45780473214e-18j), variance = 4.06108093926e-32
+```
