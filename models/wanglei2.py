@@ -53,7 +53,7 @@ class WangLei2(StateNN):
 
     def get_sign(self, config, return_thys=False ,**kwargs):
         '''Get sign using sign network.'''
-        thys = self.thnn.forward(config)
+        thys = self.thnn.forward(config,full_output=True)
         if return_thys:
             return np.exp(1j*thys[-1]), thys
         else:

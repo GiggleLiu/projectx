@@ -38,10 +38,13 @@ class ToyTHNN(ThetaNN):
     def input_shape(self):
         return self.h.size
 
-    def forward(self, x):
-        return [x, self.vec[self.h.config_indexer[packnbits_pm(x)]]]
+    def forward(self, x, data_cache=None, **kwargs):
+        y = self.vec[self.h.config_indexer[packnbits_pm(x)]]
+        if data_cache is not None:
+            data_cache['%d-ys'%id(self)] = [x,y]
+        return y
 
-    def backward(self, ys, dy=None):
+    def backward(self, ys, dy=None, **kwargs):
         if dy is None:
             dy = np.array(1,dtype=self.itype)
         dw = np.zeros_like(self.vec)

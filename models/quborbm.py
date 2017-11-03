@@ -67,5 +67,5 @@ class RBM(ANN):
         Return:
             number,
         '''
-        return self.forward(config)[-1]
+        return self.forward(config)
 
