@@ -777,3 +777,30 @@ The network looks like:
 Ratio between exact gradient and theoretical expectation:
 mean = (1+5.45780473214e-18j), variance = 4.06108093926e-32
 ```
+
+# Day 31 Otc
+
+## Review on translational invarience
+
+For state $|\psi\rangle$ with momentum $k$, we have the momentum-translation relation
+
+$\langle T_n\sigma|\psi\rangle=e^{ikn}\langle \sigma|\psi\rangle$
+
+Assume $\langle\sigma|\psi\rangle=h(\sum\limits_m e^{-ikm}g(T_m\sigma))$, and wish to obtain the state in desired momentum sector. Usually $g(T_m\sigma)$ correspond to some elemental function applied on the output of a convolution layer. **To make g more powerful, we can mix different features but not $m$ (as batch dimension)**.
+
+
+
+The above form also pose some requirements on function $h$.
+
+For $k=0$,  momentum-translation relation is automatically satisfied using arbituary $h$.
+
+For $k\neq0​$, let $y(\sigma)=\sum\limits_m e^{-ikm}g(T_m\sigma)​$, we have $y(T_n\sigma)=e^{ikn}y(\sigma)​$ which is already a qualified solution. In order to keep this attribute, $h​$ need to meet the **phase keeping** requirement $h(e^{ikn}y)=e^{ikn}h(y)​$. The folloing construction are legal
+
+* linear function that $h(\alpha y_1+\beta y_2)=\alpha h(y_1)+\beta h(y_2)$, let $\beta=0$ and the above result is straight forward,
+* nonlinear function that map $y$ to either $0$ or $\alpha y$ like ReLU,
+* elemental function that act on absolute part like $h(y)=\hat{y}h(|y|)$ with $\hat{y}\equiv\frac{y}{|y|}$, $h(e^{ikn}y)=e^{ikn}\hat{y} h(|y|)=e^{ikn}h(y)$,
+* combination of **phase keeping** functions are also **phase keeping**.
+
+### Notes:
+
+* I forget the relation between single particle momentum and wavefunction momentum.

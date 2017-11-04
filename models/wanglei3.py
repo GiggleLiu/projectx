@@ -68,7 +68,8 @@ class WangLei3(StateNN):
                 self.add_layer(layers.Poly, params=eta*typed_uniform(itype, (poly_order,)), kernel=nonlinear, factorial_rescale=factorial_rescale)
             else:
                 raise Exception
-            self.add_layer(functions.Filter, axes=(-1,), momentum=momentum)
+            #self.add_layer(functions.Filter, axes=(-1,), momentum=momentum)
+            self.add_layer(functions.Mean, axis=-1)
             if nonlinear_mask[0]: 
                 self.add_layer(functions.Sinh, params=eta*typed_uniform(itype, (poly_order,)), kernel='legendre', factorial_rescale=factorial_rescale)
                 #self.add_layer(layers.Poly, params=eta*typed_uniform(itype, (poly_order,)), kernel='legendre', factorial_rescale=factorial_rescale)
@@ -92,3 +93,5 @@ class WangLei3(StateNN):
         self.add_layer(functions.Reshape, output_shape=())
         if nonlinear_mask[1]: 
             self.add_layer(layers.Poly, params=eta*typed_uniform(itype, (poly_order,)), kernel='legendre', factorial_rescale=factorial_rescale)
+        #from poornn.checks import check_numdiff
+        #print(check_numdiff(self))
