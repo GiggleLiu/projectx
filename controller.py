@@ -154,8 +154,8 @@ def run_rtheta(J2, nsite, rtheta_training_ratio, momentum=0.):
             thetas = []
             signs = []
             for config in h.configs:
-                amps.append(rbm.forward(config)[-1])
-                thetas.append(rbm.thnn.forward(config)[-1])
+                amps.append(rbm.forward(config))
+                thetas.append(rbm.thnn.forward(config))
                 signs.append(np.exp(1j*thetas[-1]))
             amps = np.asarray(amps)
             amps = amps/np.linalg.norm(amps)
@@ -421,7 +421,7 @@ def run_rtheta_switch(J2, nsite, rtheta_training_ratio, switch_step, momentum=0.
             amp = []
             signs = []
             for config in h.configs:
-                amp.append(rbm.forward(config)[-1])
+                amp.append(rbm.forward(config))
                 signs.append(rbm.get_sign(config))
             amp = np.asarray(amp)
             amp = amp/np.linalg.norm(amp)
@@ -595,7 +595,7 @@ def run_rtheta_mlp_exp(J2, nsite, mlp_shape):
         #     amp = []
         #     signs = []
         #     for config in h.configs:
-        #         amp.append(rbm.forward(config)[-1])
+        #         amp.append(rbm.forward(config))
         #         signs.append(rbm.get_sign(config))
         #     amp = np.asarray(amp)
         #     amp = amp/np.linalg.norm(amp)
@@ -828,7 +828,7 @@ def analyse_weights2(configfile, bench_id, num_iter):
     for i in range(num_try):
         config = configs[np.random.choice(len(configs))]
         plt.clf()
-        ys = rbm.forward(config)
+        ys = rbm.forward(config,full_output=True)
         for ik,k in enumerate(keys):
             ax = plt.subplot('61%d'%(ik+1), sharex=ax if ik<4 and ik>0 else None)
             if k==7:

@@ -22,13 +22,13 @@ class WangLei3(StateNN):
     '''
     def __init__(self, input_shape, itype, powerlist, num_features=[12],fixbias=False,
             version='conv', stride=1, eta=0.2, usesum=False, nonlinear='x^3',momentum=0., poly_order=10, with_exp=False,
-            factorial_rescale=False, nonlinear_mask = [False,False]):
+            factorial_rescale=False, nonlinear_mask = [False,False], **kwargs):
         self.num_features = num_features
         nsite=np.prod(input_shape)
 
         D = len(input_shape)
         ishape = (1,)+input_shape
-        super(WangLei3, self).__init__(layers = [functions.Reshape(input_shape, itype=itype, output_shape=ishape)])
+        super(WangLei3, self).__init__(layers = [functions.Reshape(input_shape, itype=itype, output_shape=ishape)], **kwargs)
 
         NF = len(powerlist)
         plnn = ParallelNN(axis=1)

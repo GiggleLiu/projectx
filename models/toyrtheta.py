@@ -33,7 +33,7 @@ class ToyRTH(StateNN):
 
     def get_sign(self, config, return_thys=False ,**kwargs):
         '''Get sign using sign network.'''
-        thys = self.thnn.forward(config)
+        thys = self.thnn.forward(config,full_output=True)
         if return_thys:
             return np.exp(1j*thys[-1]), thys
         else:
@@ -49,8 +49,9 @@ class ToyRTH(StateNN):
     def num_variables(self):
         return self.thnn.num_variables
 
-    def forward(self, x):
-        return [self.vec[packnbits_pm(x)]]
+    def forward(self, x, full_output=False):
+        y=self.vec[packnbits_pm(x)]
+        return [y] if full_output else y
 
     def backward(self, dy):
         dw = dy*np.ones()

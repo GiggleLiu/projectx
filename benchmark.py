@@ -10,6 +10,7 @@ from plotlib import scatter_vec_phase, compare_wf
 from qstate.sampler.mpiutils import RANK
 from profilehooks import profile
 
+@profile
 def run_benchmark(config, bench_id, monitors=[], folder='.', viz=False):
     '''
     Parameters:

@@ -88,5 +88,5 @@ class ConvWF(ANN):
         Return:
             number,
         '''
-        res=self.forward(config)[-1]
+        res=self.forward(config)
         return res

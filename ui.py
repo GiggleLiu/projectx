@@ -59,6 +59,9 @@ class UI(object):
     def b12pbn(self, id, interactive=False):
         self.benchmark(configfile='benchmarks/1d12p_bn/config-sample.ini', id=id, interactive=interactive)
 
+    def b12pu(self, id, interactive=False):
+        self.benchmark(configfile='benchmarks/1d12pu/config-sample.ini', id=id, interactive=interactive)
+
     def b16p(self, id, interactive=False):
         self.benchmark(configfile='benchmarks/1d16p/config-sample.ini', id=id, interactive=interactive)
 
@@ -73,6 +76,12 @@ class UI(object):
 
     def b20p8(self, id, interactive=False):
         self.benchmark(configfile='benchmarks/1d20p8/config-sample.ini', id=id, interactive=interactive)
+
+    def b20pu(self, id, interactive=False):
+        self.benchmark(configfile='benchmarks/1d20pu/config-sample.ini', id=id, interactive=interactive)
+
+    def b40pu(self, id, interactive=False):
+        self.benchmark(configfile='benchmarks/1d40pu/config-sample.ini', id=id, interactive=interactive)
 
     def bw5(self, id, interactive=False):
         self.benchmark(configfile='benchmarks/wanglei5/config-sample.ini', id=id, interactive=interactive)

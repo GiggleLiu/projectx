@@ -55,11 +55,12 @@ class RTheta_MLP_EXP(StateNN):
 
     def get_sign(self, config, return_thys=False ,**kwargs):
         '''Get sign using sign network.'''
-        thys = self.thnn.forward(config)
+        data_cache = {}
+        y = self.thnn.forward(config,data_cache = data_cache)
         if return_thys:
-            return np.exp(1j*thys[-1]), thys
+            return np.exp(1j*y), data_cache['%d-ys'%id(self.thnn)]
         else:
-            return np.exp(1j*thys[-1])
+            return np.exp(1j*y)
 
     def get_variables(self):
         return np.concatenate([super(RTheta_MLP_EXP,self).get_variables(), self.thnn.get_variables()])
