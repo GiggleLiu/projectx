@@ -73,7 +73,8 @@ class WangLei6(StateNN):
                     bias=eta*typed_uniform(dtype, (nfo,)), boundary='P', strides=(1,)*D,is_unitary=_is_unitary(inl))
             self.use_nonlinear(nonlinear_list[inl])
         if NP!=0: self.add_layer(functions.Exp)
-
+        if self.num_layers == 0:
+            self.layers.append(functions.Reshape(ishape, itype=itype, output_shape = (1,)+ishape))
         # convolution layers.
         eta=eta1
         dtype = self.layers[-1].otype

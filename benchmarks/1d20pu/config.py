@@ -8,10 +8,18 @@ powerlist_list = [
         [[1,0,1],[1,1]],
 
         [[1,0,1],[1,1]],
+        [[1,0,1],[1,1]],
+        [[1,0,1],[1,1]],
+        [[1,0,1],[1,1]],
+        [[1,0,1],[1,1]],
+
+        [[1,0,1],[1,1]],
+        None,
         ]
 num_features_list = [
         [20], [20], [20], [20], [20],
         [20], [20], [20], [20], [20],
+        [10], [20],
         ]
 nonlinear_list_list = [
         ['sinh','none','none'],
@@ -21,6 +29,13 @@ nonlinear_list_list = [
         ['polynomial_r','none','none'],
 
         ['sinh','none','none'],
+        ['polynomial_r','none','none'],
+        ['sinh','none','none'],
+        ['polynomial','none','none'],
+        ['sinh','none','none'],
+        
+        ['sinh','none','none'],
+        ['log2cosh','none','exp'],
         ]
 
 def modifyconfig_and_getnn(config, bench_id):
@@ -38,11 +53,16 @@ def modifyconfig_and_getnn(config, bench_id):
     nonlinear_list = nonlinear_list_list[bench_id]
     soften_gradient = False
     isym = False
+    config['optimize']['step_rate']/=3.
 
     if bench_id==1 or bench_id==3:
         soften_gradient = True
-    if bench_id == 5:
+    if bench_id == 5 or bench_id == 6:
         isym =True
+    if bench_id == 7 or bench_id==8:
+        usesum = False
+    if bench_id == 9:
+        itype = 'float64'
 
     rbm = WangLei6(input_shape=tuple(config['hamiltonian']['size']), num_features=num_features,
             itype=itype,dtype0=itype, dtype1=itype, powerlist=powerlist,

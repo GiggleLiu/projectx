@@ -21,7 +21,6 @@ class ProbDef(object):
         self.num_vmc_sample = num_vmc_sample
         self.redistribute_samples = redistribute_samples
 
-    @profile
     def compute_gradient(self, x):
         '''
         Compute the gradient.
@@ -107,7 +106,7 @@ class ProbDef(object):
 
         self.cache['opq_vals'] = opq_vals
         self.cache['samples'] = samples
-        return gradient
+        return gradient.astype(rbm.dtype)
 
     def get_energy(self):
         vmc, rbm, sr = self.vmc, self.rbm, self.sr
