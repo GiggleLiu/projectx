@@ -10,7 +10,7 @@ from poornn.utils import typed_uniform
 from poornn import SPConv, Linear, functions, ParallelNN, pfunctions, monitors, ANN
 from poornn.checks import check_numdiff
 from .base import StateNN
-from .layers import IsingRG2D, XLogcosh
+from qstate.core.utils import packnbits_pm
 
 __all__=['WangLei6']
 
@@ -26,11 +26,12 @@ class WangLei6(StateNN):
         :dtype0, dtype1: str, data type of variables in product/linear layers.
         :itype: str, input data dtype.
     '''
-    def __init__(self, input_shape, nonlinear_list, powerlist=None, num_features=[4,4,4], eta0=0.2, eta1=0.2, NP=1, NC=1, K=None,\
+    def __init__(self, sign_func, input_shape, nonlinear_list, powerlist=None, num_features=[4,4,4], eta0=0.2, eta1=0.2, NP=1, NC=1, K=None,\
             itype='complex128',dtype0='complex128', dtype1='complex128', momentum=0., isym = False,
                     usesum=False,poly_order=10, do_BN=False,is_unitary=False, **kwargs):
         if K is None:
             K=np.prod(input_shape)
+        self._sign_func = sign_func
         self.num_features = num_features
         self.do_BN = do_BN
         self.poly_order = poly_order
@@ -102,72 +103,13 @@ class WangLei6(StateNN):
                 self.use_nonlinear(nonlinear_list[inl])
         print(check_numdiff(self))
 
-    def use_nonlinear(self,nonlinear):
-        # non-linear function
-        if nonlinear[-2:] == '_n':
-            self.add_layer(functions.Normalize,axis=None,scale=1.0*np.sqrt(np.prod(self.layers[-1].output_shape)))
-            self.add_layer(pfunctions.PMul,c=1.)
-            nonlinear = nonlinear[:-2]
+    def forward(self,x,**kwargs):
+        return super(WangLei6, self).forward(x, **kwargs)*self.get_sign(x)
 
-        if nonlinear=='none':
-            pass
-        elif nonlinear=='x^3':
-            self.add_layer(functions.Power,order=3)
-        elif nonlinear=='x^5':
-            self.add_layer(functions.Power,order=5)
-        elif nonlinear=='relu':
-            self.add_layer(functions.ReLU)
-        elif nonlinear=='sinh':
-            self.add_layer(functions.Sinh)
-        elif nonlinear=='softplus':
-            self.add_layer(functions.SoftPlus)
-        elif nonlinear=='tanh':
-            self.add_layer(functions.Tanh)
-        elif nonlinear=='sin':
-            self.add_layer(functions.Sin)
-        elif nonlinear=='tan':
-            self.add_layer(functions.Tan)
-        elif nonlinear=='log2cosh':
-            self.add_layer(functions.Log2cosh)
-        elif nonlinear=='logcosh':
-            self.add_layer(functions.Logcosh)
-        elif nonlinear=='ks_logcosh':
-            from poornn import KeepSignFunc
-            layer = functions.Logcosh(self.layers[-1].output_shape, 'float64')
-            self.layers.append(KeepSignFunc(layer))
-        elif nonlinear=='cos':
-            self.add_layer(functions.Cos)
-        elif nonlinear=='exp':
-            self.add_layer(functions.Exp)
-        elif nonlinear=='arctan':
-            self.add_layer(functions.ArcTan)
-        elif nonlinear=='IsingRG2D':
-            self.add_layer(IsingRG2D)
-        elif nonlinear=='XLogcosh':
-            self.add_layer(XLogcosh)
-        elif nonlinear=='ks_IsingRG2D':
-            from poornn import KeepSignFunc
-            layer = IsingRG2D(self.layers[-1].output_shape, 'float64')
-            self.layers.append(KeepSignFunc(layer))
-        elif nonlinear=='ks_x^1/3':
-            from poornn import KeepSignFunc
-            layer = functions.Power(self.layers[-1].output_shape, 'float64', order=1.0/3)
-            self.layers.append(KeepSignFunc(layer))
-        elif nonlinear=='gaussian':
-            self.layers.append(pfunctions.Gaussian, params=[0j,1.],var_mask=[False,True])
-        elif nonlinear=='real':
-            self.add_layer(functions.Real)
-        elif nonlinear[-2:]=='_r' and nonlinear[:-2] in pfunctions.Poly.kernel_dict:
-            params = self.eta1*typed_uniform(self.layers[-1].otype, (self.poly_order,))
-            #var_mask=np.array([False, True]*(self.poly_order//2)+[False]*(self.poly_order%2))
-            #params[~var_mask] = 0
-            #params[var_mask]*=np.sign(params[var_mask].real)  # positive real part
-            self.add_layer(pfunctions.Poly, params=params, kernel=nonlinear[:-2], factorial_rescale=True, var_mask=None)
-        elif nonlinear in pfunctions.Poly.kernel_dict:
-            params = self.eta1*typed_uniform(self.layers[-1].otype, (self.poly_order,))
-            #var_mask=np.array([False, True]*(self.poly_order//2)+[False]*(self.poly_order%2))
-            #params[~var_mask] = 0
-            #params[var_mask]*=np.sign(params[var_mask].real)  # positive real part
-            self.add_layer(pfunctions.Poly, params=params, kernel=nonlinear, factorial_rescale=False, var_mask=None)
-        else:
-            raise Exception
+    def backward(self, xy, dy, **kwargs):
+        x, y = xy
+        xy = x, y/self.get_sign(x)
+        return super(WangLei6, self).backward(xy, dy/self.get_sign(x), **kwargs)
+
+    def get_sign(self,x):
+        return self._sign_func(x)
