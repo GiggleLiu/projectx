@@ -98,18 +98,17 @@ def scale_ed_msr(size, J2MIN=0, J2MAX=1, NJ2=51, yscale='log'):
     J2L = np.linspace(J2MIN, J2MAX, NJ2)
     e0l, el = [], []
     for i,J2 in enumerate(J2L):
-        if len(size)==1:
-            h = load_hamiltonian('J1J2', size=size, J2=J2)
-        else:
-            h = load_hamiltonian('J1J22D', size=size, J2=J2)
+        h = load_hamiltonian('J1J2', size=size, J2=J2)
         H = h.get_mat()
         e0, v0 = sps.linalg.eigsh(H, which='SA', k=1)
         v0 = v0.ravel()
-        marshall_signs = marshall_sign_rule(h.configs, size=size)
+        configs, config_indexer = h.get_config_table()
+        marshall_signs = marshall_sign_rule(configs, size=size)
         v = abs(v0)*marshall_signs
         el.append(v.T.conj().dot(H.dot(v)))
         e0l.append(e0.item())
         print('%s'%i)
+    np.savetxt('notes/data/scale_msr_%s.dat'%(size,), list(zip(el, e0l)))
     plt.ion()
     plt.plot(J2L, np.array(el)-e0l)
     plt.xlabel(r'$J_2$')

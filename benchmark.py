@@ -29,7 +29,7 @@ def run_benchmark(config, bench_id, monitors=[], folder='.', viz=False):
     max_iter = config['optimize']['max_iter']
 
     if RANK==0:
-        _save_net_and_show_config(rbm, config, folder, bench_id, viz)
+        _show_config(rbm, config, folder, bench_id, viz)
         el=[] # to store energy
         print('\nRunning 0-th Iteration.')
 
@@ -54,13 +54,8 @@ def run_benchmark(config, bench_id, monitors=[], folder='.', viz=False):
         np.savetxt('%s/el-%s.dat'%(folder,bench_id),np.real(el))
         np.savetxt('%s/rbm-%s.dat'%(folder,bench_id),rbm.get_variables().view('float64'))
 
-def _save_net_and_show_config(rbm, config, folder, bench_id, viz):
-    if viz:
-        # visualize network
-        from poornn import viznn
-        viznn(rbm, filename=folder+'/%s-%s.png'%(rbm.__class__.__name__,bench_id))
-
-    # now flush configuration to stdout
+def _show_config(rbm, config, folder, bench_id, viz):
+    '''flush configuration to stdout'''
     print('#'*20+' Configuration '+'#'*20)
     for key, val in config.items():
         print('%s:'%(key,))
@@ -70,23 +65,6 @@ def _save_net_and_show_config(rbm, config, folder, bench_id, viz):
     print('#'*22+' Network '+'#'*22)
     print(rbm)
     print('-'*55+'\n')
-
-def load_rbm(configfile, bench_id, i_iter = None):
-    '''
-    Load a network, if i_iter specified, load variables at the same time.
-    '''
-    config = load_config(configfile)
-    # folder to store data, containing config.py
-    folder = os.path.dirname(configfile)
-
-    # modification to parameters
-    sys.path.insert(0,folder)
-    from config import modifyconfig_and_getnn
-    rbm = modifyconfig_and_getnn(config, bench_id)
-
-    if i_iter is not None:
-        rbm.set_variables(i_iter)
-    return rbm
 
 def main():
     from monitors import Print_eng_with_exact, print_eng, show_wf, DumpNetwork

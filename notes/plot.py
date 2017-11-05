@@ -245,6 +245,17 @@ def show_1d20p(dataset=''):
         pdb.set_trace()
         plt.savefig('img/%s-%s%s.png'%('errl' if show_err else 'el', token, ''))
 
+def plot_ed_msr():
+    J2L = np.linspace(0, 1, 51)
+    with DShow((5,3), 'img/MSR_ED.png') as d:
+        for size in [(16,),(4,4)]:
+            el, e0l = np.loadtxt('data/scale_msr_%s.dat'%(size,)).T
+            plt.plot(J2L, el-e0l, lw=2)
+        plt.xlabel(r'$J_2/J_1$', fontsize=14)
+        plt.ylabel(r'$E-E_0$', fontsize=14)
+        plt.yscale('log')
+        plt.legend([r'1D, $L=16$', r'2D, $L=4,4$'])
+
 if __name__ == '__main__':
     #show_bench44K()
     #show_bench44dn()
@@ -263,4 +274,5 @@ if __name__ == '__main__':
     #show_1d16p('usesum')
     #show_1d16p('nfeature')
     #show_1d16p('rate')
-    show_1d20p('nonlinear')
+    #show_1d20p('nonlinear')
+    plot_ed_msr()

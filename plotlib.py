@@ -1,5 +1,6 @@
 try:
     from matplotlib import pyplot as plt
+    import matplotlib
 except:
     import matplotlib
     matplotlib.rcParams['backend'] = 'TkAgg'
@@ -27,24 +28,26 @@ def show_kernel(rbm):
     plt.pcolormesh(strength.real)
     plt.axis('equal')
 
-def show_el(datafiles, EG=None, xlogscale=True, window=None, legends=None,\
+def show_el(datafiles, nsite, EG=None, xlogscale=True, window=None, legends=None,\
         show_err=False, smooth_step=1):
     if legends is None: legends = np.arange(len(datafiles))
     # prepair data
     for datafile in datafiles:
-        el=np.loadtxt(datafile)
+        el=np.loadtxt(datafile)/nsite
         if smooth_step!=1: el=el.reshape([-1,smooth_step]).mean(axis=1)
         steps=np.arange(len(el))*smooth_step
         if show_err:
-            plt.plot(steps,abs((el-EG)/EG), lw=2)
+            plt.plot(steps,abs((el-EG)), lw=2)
         else:
             plt.plot(steps,el, lw=2)
 
-    plt.xlabel('Step')
-    plt.ylabel(r'$\Delta E/E_G$' if show_err else r'$E$')
+    plt.xlabel('Iteration')
+    plt.ylabel(r'$\Delta \mathcal{E}/\mathcal{N}$' if show_err\
+            else r'$\mathcal{E}/\mathcal{N}$')
     if xlogscale: plt.xscale('log')
     if show_err: plt.yscale('log')
-    if EG is not None and not show_err: plt.axhline(y=EG, ls='--', color='#666666')
+    if EG is not None and not show_err:
+        plt.axhline(y=EG/nsite, ls='--', color='#666666')
     if window is not None: plt.ylim(*window)
     plt.legend(legends)
 
@@ -116,3 +119,57 @@ def plot_sign_mat(sign_classifier):
     plt.tight_layout()
 
 
+class DShow():
+    '''
+    Dynamic plot context, intended for displaying geometries.
+    like removing axes, equal axis, dynamically tune your figure and save it.
+
+    Args:
+        figsize (tuple, default=(6,4)): figure size.
+        filename (filename, str): filename to store generated figure, if None, it will not save a figure.
+
+    Attributes:
+        figsize (tuple, default=(6,4)): figure size.
+        filename (filename, str): filename to store generated figure, if None, it will not save a figure.
+        ax (Axes): matplotlib Axes instance.
+
+    Examples:
+        with DynamicShow() as ds:
+            c = Circle([2, 2], radius=1.0)
+            ds.ax.add_patch(c)
+    '''
+
+    def __init__(self, figsize=(6, 4), filename=None, dpi=300):
+        self.figsize = figsize
+        self.filename = filename
+        self.ax = None
+
+    def __enter__(self):
+        _setup_mpl()
+        plt.ion()
+        plt.figure(figsize=self.figsize)
+        self.ax = plt.gca()
+        return self
+
+    def __exit__(self, *args):
+        plt.tight_layout()
+        if self.filename is not None:
+            print('Press `c` to save figure to "%s", `Ctrl+d` to break >>'%self.filename)
+            pdb.set_trace()
+            plt.savefig(self.filename, dpi=300)
+        else:
+            pdb.set_trace()
+
+def _setup_mpl():
+    '''customize matplotlib.'''
+    plt.rcParams['lines.linewidth'] = 2
+    plt.rcParams['axes.labelsize'] = 14
+    plt.rcParams['axes.titlesize'] = 18
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = 'Ubuntu'
+    plt.rcParams['font.monospace'] = 'Ubuntu Mono'
+    plt.rcParams['axes.labelweight'] = 'bold'
+    plt.rcParams['xtick.labelsize'] = 12
+    plt.rcParams['ytick.labelsize'] = 12
+    plt.rcParams['legend.fontsize'] = 14
+    plt.rcParams['figure.titlesize'] = 18
