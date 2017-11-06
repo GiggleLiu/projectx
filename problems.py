@@ -15,7 +15,6 @@ from utils import mvar, set_mvar_with_samples
 class ProbDef(object):
     def __init__(self, hamiltonian, rbm, vmc, sr, num_vmc_run, num_vmc_sample, redistribute_samples = True):
         self.hamiltonian, self.rbm, self.vmc, self.sr = hamiltonian, rbm, vmc, sr
-        print('RANK = %d, id = %s, %s'%(RANK, self.rbm.uuid, self.rbm.layers[0].layers[1].uuid if self.rbm.isym else None))
         self.cache = {}
         self.num_vmc_run = num_vmc_run
         self.num_vmc_sample = num_vmc_sample
@@ -107,7 +106,7 @@ class ProbDef(object):
 
         self.cache['opq_vals'] = opq_vals
         self.cache['samples'] = samples
-        return gradient
+        return gradient.astype(rbm.otype)
 
     def get_energy(self):
         vmc, rbm, sr = self.vmc, self.rbm, self.sr
@@ -188,6 +187,8 @@ def load_config(config_file):
     result = config.validate(validator,preserve_errors=True)
     if result!=True:
         raise ValueError('Configuration Error! %s'%result)
+    if config['mpi']['num_core'] is None:
+        config['mpi']['num_core'] = config['vmc']['num_vmc_run']
     return config
 
 def pconfig(config, rbm):

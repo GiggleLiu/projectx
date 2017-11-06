@@ -6,6 +6,7 @@ import numpy as np
 from utils import analyse_exact
 from problems import load_hamiltonian
 from plotlib import plt, DShow
+from views import get_opt_prob
 
 class UI(object):
     ###################  BENTCHMARK  ######################
