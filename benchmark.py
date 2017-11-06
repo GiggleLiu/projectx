@@ -11,7 +11,7 @@ from qstate.sampler.mpiutils import RANK
 from profilehooks import profile
 
 @profile
-def run_benchmark(rbm, bench_id, monitors=[], folder='.', viz=False):
+def run_benchmark(config, rbm, bench_id, monitors=[], folder='.', viz=False):
     '''
     Parameters:
         :configfile: str, the location of configuration file.
@@ -66,18 +66,18 @@ def main():
     configfile, bench_id = sys.argv[1:]
     np.random.seed(3)
 
-    config = load_config(configfile)
+    dconfig = load_config(configfile)
     # folder to store data, containing config.py
     folder = os.path.dirname(configfile)
     # modification to parameters
     sys.path.insert(0,folder)
     from config import modifyconfig_and_getnn
-    rbm = modifyconfig_and_getnn(config, bench_id)
-    e0 = config['hamiltonian']['EG']
+    rbm = modifyconfig_and_getnn(dconfig, int(bench_id))
+    e0 = dconfig['hamiltonian']['EG']
 
     import datetime
     print(datetime.datetime.now())
-    run_benchmark(rbm, int(bench_id),\
+    run_benchmark(dconfig, rbm, int(bench_id),\
             monitors = [
                 Print_eng_with_exact(e0),\
                 DumpNetwork(folder=os.path.dirname(configfile),token=bench_id,step=1000)\
