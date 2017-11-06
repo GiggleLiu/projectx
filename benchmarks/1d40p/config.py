@@ -5,14 +5,15 @@ powerlist_list = [
         [[1,1],[1,0,1]],
         [[1,1],[1,0,1]],
         [[1,1],[1,0,1]],
+        [[1,1],[1,0,1],[1,0,0,1]],
         ]
 
 num_feature_list = [
-        [40], [40], [40],
+        [40], [40], [40], [40],
         ]
 
 nonlinear_list = [
-        'sinh','polynomial', 'polynomial',
+        'sinh','polynomial', 'polynomial', 'legendre',
         ]
 momentum_list = [
         0,0,0,0,0,

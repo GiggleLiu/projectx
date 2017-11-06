@@ -5,6 +5,8 @@ from utils import J1J2EG_TABLE
 
 def modifyconfig_and_getnn(config, bench_id):
     itype = 'float64'
+    use_conv=[False,False]
+    preprocessing = False
     # set lattice size
     if bench_id==0:
         config['hamiltonian']['size'] = [8]
@@ -18,7 +20,19 @@ def modifyconfig_and_getnn(config, bench_id):
         config['hamiltonian']['size'] = [40]
         config['hamiltonian']['J2'] = 0.8
     if bench_id == 9:
-        use_conv = True
+        use_conv = [True, False]
+    if bench_id == 10:
+        use_conv = [True, True]
+    if bench_id == 11:
+        config['hamiltonian']['size'] = [40]
+        use_conv = [True, True]
+    if bench_id == 12:
+        config['hamiltonian']['size'] = [40]
+        config['hamiltonian']['J2'] = 0.8
+        use_conv = [True, True]
+    if bench_id == 13:    
+        use_conv = [True, True]
+        preprocessing = True
 
     version='basic'
     nsite = np.prod(config['hamiltonian']['size'])
@@ -32,10 +46,12 @@ def modifyconfig_and_getnn(config, bench_id):
     # set version
     if bench_id >= 3:
         version='sigmoid'
+    if bench_id >= 9:
+        num_features1 = [4]
 
     J2 = config['hamiltonian']['J2']
     config['hamiltonian']['EG'] = J1J2EG_TABLE[J2].get(nsite)
 
     rbm = CaiZi(input_shape=tuple(config['hamiltonian']['size']), itype = itype, use_conv=use_conv,
-            num_features1=num_features1, num_features2 = num_features2, version=version)
+            num_features1=num_features1, num_features2 = num_features2, version=version, preprocessing=preprocessing)
     return rbm
