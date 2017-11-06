@@ -11,7 +11,7 @@ from qstate.sampler.mpiutils import RANK
 from profilehooks import profile
 
 @profile
-def run_benchmark(config, bench_id, monitors=[], folder='.', viz=False):
+def run_benchmark(rbm, bench_id, monitors=[], folder='.', viz=False):
     '''
     Parameters:
         :configfile: str, the location of configuration file.
@@ -19,11 +19,6 @@ def run_benchmark(config, bench_id, monitors=[], folder='.', viz=False):
         :monitors: func, functions take (problem, optimizer) as parameters.
         :folder: str, where to save data.
     '''
-    # modification to parameters
-    sys.path.insert(0,folder)
-    from config import modifyconfig_and_getnn
-    rbm = modifyconfig_and_getnn(config, bench_id)
-
     optimizer, problem = pconfig(config, rbm)
     h, sr, rbm, vmc = problem.hamiltonian, problem.sr, problem.rbm, problem.vmc
     max_iter = config['optimize']['max_iter']
@@ -74,11 +69,15 @@ def main():
     config = load_config(configfile)
     # folder to store data, containing config.py
     folder = os.path.dirname(configfile)
+    # modification to parameters
+    sys.path.insert(0,folder)
+    from config import modifyconfig_and_getnn
+    rbm = modifyconfig_and_getnn(config, bench_id)
     e0 = config['hamiltonian']['EG']
 
     import datetime
     print(datetime.datetime.now())
-    run_benchmark(config, int(bench_id),\
+    run_benchmark(rbm, int(bench_id),\
             monitors = [
                 Print_eng_with_exact(e0),\
                 DumpNetwork(folder=os.path.dirname(configfile),token=bench_id,step=1000)\

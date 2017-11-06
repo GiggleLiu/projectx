@@ -114,3 +114,7 @@ def set_mvar_with_samples(rbm,samples, learning_rate=0.1):
         mean, var = mvar(di, weights=counts, axis=0, keepdims=False)
         layer.mean = mean*learning_rate+layer.mean*(1-learning_rate)
         layer.variance = var*learning_rate+layer.variance*(1-learning_rate)
+
+J1J2EG_TABLE = {
+        20:{0.0:None}
+        }
