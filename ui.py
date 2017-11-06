@@ -140,10 +140,14 @@ class UI(object):
         configfile = 'benchmarks/%s/config-sample.ini'%subfolder
         folder = os.path.dirname(configfile)
         config = load_config(configfile)
-        with DShow((5,3.5),filename="notes/data/EL-%s-%s.%s"%(subfolder,bench_id,extension)) as ds:
+        EG = config['hamiltonian']['EG']
+        if EG is None:
+            h = load_hamiltonian(model='J1J2',J1=1, J2=config['hamiltonian']['J2'], size=config['hamiltonian']['size'])
+            H, EG, v, configs = analyse_exact(h, do_printsign=False, num_eng=1)
+        with DShow((5,3.5),filename="notes/data/ERRL-%s-%s.%s"%(subfolder,bench_id,extension)) as ds:
             show_el(datafiles = ['%s/el-%i.dat'%(folder,bench_id)],
                     nsite = np.prod(config['hamiltonian']['size']),
-                    EG = config['hamiltonian']['EG'],
+                    EG = EG,
                     legends = ['id = %s'%bench_id],
                     show_err=True,
                     xlogscale=False)
