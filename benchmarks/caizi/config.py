@@ -33,6 +33,11 @@ def modifyconfig_and_getnn(config, bench_id):
     if bench_id == 13:    
         use_conv = [True, True]
         preprocessing = True
+    if bench_id == 15:    
+        use_conv = [True, True]
+        preprocessing = True
+        config['hamiltonian']['size'] = [40]
+        config['optimize']['step_rate']*=3
 
     version='basic'
     nsite = np.prod(config['hamiltonian']['size'])
@@ -46,8 +51,12 @@ def modifyconfig_and_getnn(config, bench_id):
     # set version
     if bench_id >= 3:
         version='sigmoid'
+
+    # set # of feature list
     if bench_id >= 9:
         num_features1 = [4]
+        if bench_id==15:
+            num_features1 = [10]
 
     J2 = config['hamiltonian']['J2']
     config['hamiltonian']['EG'] = J1J2EG_TABLE[J2].get(nsite)
