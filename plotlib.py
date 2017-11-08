@@ -37,6 +37,7 @@ def show_el(datafiles, nsite, EG=None, xlogscale=True, window=None, legends=None
         if smooth_step!=1: el=el.reshape([-1,smooth_step]).mean(axis=1)
         steps=np.arange(len(el))*smooth_step
         if show_err:
+            print(EG)
             plt.plot(steps,abs((el-EG/nsite)), lw=2)
         else:
             plt.plot(steps,el, lw=2)

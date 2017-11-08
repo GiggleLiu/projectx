@@ -40,6 +40,10 @@ def modifyconfig_and_getnn(config, bench_id):
         config['hamiltonian']['J2'] = 0.8
         use_conv = [True, True]
         preprocessing = True
+    if bench_id == 15:    
+        use_conv = [True, True]
+        preprocessing = True
+        config['hamiltonian']['size'] = [40]
     if bench_id == 16:
         config['hamiltonian']['size'] = [30]
         config['hamiltonian']['J2'] = 0.8
@@ -50,7 +54,6 @@ def modifyconfig_and_getnn(config, bench_id):
         config['hamiltonian']['size'] = [40]
         config['hamiltonian']['J2'] = 0.2
         preprocessing = True
-        config['optimize']['step_rate']*=3
 
     version='basic'
     nsite = np.prod(config['hamiltonian']['size'])

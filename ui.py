@@ -140,6 +140,12 @@ class UI(object):
         configfile = 'benchmarks/%s/config-sample.ini'%subfolder
         folder = os.path.dirname(configfile)
         config = load_config(configfile)
+
+        # modification to parameters
+        sys.path.insert(0,folder)
+        from config import modifyconfig_and_getnn
+        rbm = modifyconfig_and_getnn(config, bench_id)
+
         EG = config['hamiltonian']['EG']
         if EG is None:
             h = load_hamiltonian(model='J1J2',J1=1, J2=config['hamiltonian']['J2'], size=config['hamiltonian']['size'])
