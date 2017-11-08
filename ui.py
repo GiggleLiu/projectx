@@ -2,13 +2,29 @@
 
 import fire, os, sys, pdb
 import numpy as np
+import contextlib
 
 from utils import analyse_exact
-from problems import load_hamiltonian
-from plotlib import plt, DShow
+from problems import load_hamiltonian, load_config, pconfig
+from plotlib import plt, DShow, show_el
 from views import get_opt_prob
 
 class UI(object):
+    def help(self):
+        '''
+        help:
+            show this help text.
+        '''
+        print('''
+    Quantum circuit learn.
+
+    Usage: ./ui.py <option> [args ...]
+
+    Option List:
+        %s
+        '''%('\t\t'.join([x.__doc__ for x in [self.help, self.demo, self.profile_demo, self.b1, self.v]])))
+
+
     ###################  BENTCHMARK  ######################
     def benchmark(self, configfile, bench_id, interactive=False):
         from problems import load_config
@@ -119,12 +135,12 @@ class UI(object):
     def bve(self, subfolder, bench_id, extension='png'):
         '''show energy function.'''
         # get configuration and foler
-        from problems import load_config, pconfig
-        from plotlib import show_el
         configfile = 'benchmarks/%s/config-sample.ini'%subfolder
         folder = os.path.dirname(configfile)
         config = load_config(configfile)
-        with DShow((5,3.5),filename="notes/data/EL-%s-%s.%s"%(subfolder,bench_id,extension)) as ds:
+        context = DShow((5,3.5),filename="notes/img/EL-%s-%s.%s"%(subfolder,
+            bench_id,extension)) if extension is not '-' else contextlib.ExitStack()
+        with context:
             show_el(datafiles = ['%s/el-%i.dat'%(folder,bench_id)],
                     nsite = np.prod(config['hamiltonian']['size']),
                     EG = config['hamiltonian']['EG'],
@@ -135,8 +151,6 @@ class UI(object):
     def bverr(self, subfolder, bench_id, extension='png'):
         '''show energy error function.'''
         # get configuration and foler
-        from problems import load_config, pconfig
-        from plotlib import show_el
         configfile = 'benchmarks/%s/config-sample.ini'%subfolder
         folder = os.path.dirname(configfile)
         config = load_config(configfile)
@@ -150,13 +164,33 @@ class UI(object):
         if EG is None:
             h = load_hamiltonian(model='J1J2',J1=1, J2=config['hamiltonian']['J2'], size=config['hamiltonian']['size'])
             H, EG, v, configs = analyse_exact(h, do_printsign=False, num_eng=1)
-        with DShow((5,3.5),filename="notes/data/ERRL-%s-%s.%s"%(subfolder,bench_id,extension)) as ds:
+        context = DShow((5,3.5),filename="notes/img/ERRL-%s-%s.%s"%(subfolder,
+            bench_id,extension)) if extension is not '-' else contextlib.ExitStack()
+        with context:
             show_el(datafiles = ['%s/el-%i.dat'%(folder,bench_id)],
                     nsite = np.prod(config['hamiltonian']['size']),
                     EG = EG,
                     legends = ['id = %s'%bench_id],
                     show_err=True,
                     xlogscale=False)
+
+    def bcomp(self, task, subfolder, ids, extension='png'):
+        '''
+        Args:
+            task ('err', 'e'): task
+        '''
+        idstr = ''.join(['%d'%i for i in ids])
+        context = DShow((5,3.5),filename="notes/img/%sCMP-%s-%s.%s"%(task.upper(),subfolder,
+            idstr,extension)) if extension is not '-' else contextlib.ExitStack()
+        with context:
+            for bench_id in ids:
+                if task == 'err':
+                    self.bverr(subfolder, bench_id, extension='-')
+                elif task == 'e':
+                    self.bve(subfolder, bench_id, extension='-')
+                else:
+                    raise
+            plt.legend(['id = %d'%i for i in ids])
 
     ######################  EXACT  #########################
 
@@ -170,6 +204,5 @@ class UI(object):
             print('sign = %s'%np.sign(v))
             np.set_printoptions(threshold=1000)
     
-
 if __name__ == '__main__':
     fire.Fire(UI)

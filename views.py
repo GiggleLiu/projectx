@@ -370,3 +370,4 @@ def analyse_polycurve(configfile, num_iter, bench_id_list, show_var=False, token
         plt.savefig('notes/img/polyvar-%s.png'%token)
     else:
         plt.savefig('notes/img/polycurve-%s.png'%token)
+
