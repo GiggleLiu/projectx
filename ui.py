@@ -138,6 +138,13 @@ class UI(object):
         configfile = 'benchmarks/%s/config-sample.ini'%subfolder
         folder = os.path.dirname(configfile)
         config = load_config(configfile)
+
+        # modification to parameters
+        sys.path.insert(0,folder)
+        from config import modifyconfig_and_getnn
+        rbm = modifyconfig_and_getnn(config, bench_id)
+
+        EG = config['hamiltonian']['EG']
         context = DShow((5,3.5),filename="notes/img/EL-%s-%s.%s"%(subfolder,
             bench_id,extension)) if extension is not '-' else contextlib.ExitStack()
         with context:
