@@ -29,7 +29,7 @@ class WangLei4(StateNN):
     '''
     def __init__(self, input_shape, NF=4, K=2, num_features=[12], eta0=0.2, eta1=0.2,
             itype='complex128',version='linear', dtype0='complex128', dtype1='complex128', stride=None):
-        self.num_features, self.itype = num_features, itype
+        self.num_features = num_features
         if stride is None:
             if any([n%4!=0 for n in input_shape]):
                 stride=2
@@ -38,7 +38,7 @@ class WangLei4(StateNN):
         self.stride = stride
         nsite=np.prod(input_shape)
         eta=eta0
-        super(WangLei4, self).__init__(itype, do_shape_check=False)
+        super(WangLei4, self).__init__()
 
         D = len(input_shape)
         ishape = (1,)+input_shape
