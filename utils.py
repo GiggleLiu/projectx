@@ -121,3 +121,27 @@ J1J2EG_TABLE = {
         0.5:{20:-7.5, 30:-11.25, 40:-15, 100:37.5},
         0.8:{20:-8.46127240196, 30:-12.6588455544, 40:-16.8706800952, 100:-42.0700632095},
         }
+
+def dos(data, wlist, weights=1., eta=0.03):
+    '''
+    get density of states from spectrums.
+    
+    Args:
+        data (ndarray): ndarray, the spectrum mesh.
+        wlist (1darray<float>): 1d array, the spectrum holding space.
+        weights (ndarray/number, default=1.0): the weight of each spectrum.
+        eta (float, default=0.03): float, the smearing factor.
+
+    Return:
+        1darray: density of states.
+    '''
+    nw = len(wlist)
+    data = data.ravel()
+    if np.ndim(weights)>1:
+        weights = weights.ravel()
+
+    dos = (weights/(wlist[:,None]+1j*eta-np.reshape(data,[1,-1]))).imag.mean(axis=-1)
+    dos *= -1./np.pi
+    return dos
+
+

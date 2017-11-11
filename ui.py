@@ -190,6 +190,7 @@ class UI(object):
         context = DShow((5,3.5),filename="notes/img/%sCMP-%s-%s.%s"%(task.upper(),subfolder,
             idstr,extension)) if extension is not '-' else contextlib.ExitStack()
         with context:
+            legends = []
             for bench_id in ids:
                 if task == 'err':
                     self.bverr(subfolder, bench_id, extension='-')
@@ -197,7 +198,8 @@ class UI(object):
                     self.bve(subfolder, bench_id, extension='-')
                 else:
                     raise
-            plt.legend(['id = %d'%i for i in ids])
+                legends.append('id = %d'%bench_id)
+            plt.legend(legends)
 
     ######################  EXACT  #########################
 

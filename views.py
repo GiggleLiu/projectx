@@ -5,7 +5,7 @@ import scipy.sparse as sps
 import pdb, os, sys
 
 from problems import ModelProbDef, load_hamiltonian, get_optimizer, load_config, pconfig
-from utils import analyse_exact, sign_func_from_vec, space_inversion, translate
+from utils import analyse_exact, sign_func_from_vec, space_inversion, translate, dos
 from plotlib import scatter_vec_phase, compare_wf, check_sample, plt, DShow
 from qstate.sampler import get_ground_toynn
 from qstate.sampler.mpiutils import RANK
@@ -371,3 +371,27 @@ def analyse_polycurve(configfile, num_iter, bench_id_list, show_var=False, token
     else:
         plt.savefig('notes/img/polycurve-%s.png'%token)
 
+
+def show_prod(J2, size):
+    h = load_hamiltonian('J1J2', size=size, J2=J2)
+    H = h.get_mat()
+    c0, indexer = h.get_config_table()
+    e0, v0 = sps.linalg.eigsh(H, which='SA', k=1)
+    v0 = v0.ravel()
+    order = np.argsort(abs(v0))[::-1]
+    v0 = v0[order]
+    c0 = c0[order]
+    amp = np.abs(v0)*100
+    nn = np.sum(c0*np.roll(c0,1,axis=1),axis=1)
+    nnn = np.sum(c0*np.roll(c0,2,axis=1),axis=1)
+    hndim = len(c0)
+    #wlist = np.linspace(0,hndim,2000)
+    #nn = dos(np.arange(hndim), wlist=wlist, weights=nn, eta=2.)*hndim
+    plt.ion()
+    plt.plot(np.arange(hndim),amp)
+    plt.fill_between(np.arange(hndim),nn,0,alpha=0.5,color='r')
+    plt.fill_between(np.arange(hndim),nnn,0,alpha=0.5,color='g')
+    plt.legend(['$|\psi|$',r'$\sum_iS^z_i\times S^z_{i+1}$',r'$\sum_iS^z_i\times S^z_{i+2}$'])
+    plt.axhline(0, color='#999999')
+    pdb.set_trace()
+    plt.savefig('notes/img/prod_J2%sN%s.png'%(J2,size),dpi=300)

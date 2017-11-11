@@ -38,9 +38,9 @@ def show_el(datafiles, nsite, EG=None, xlogscale=True, window=None, legends=None
         steps=np.arange(len(el))*smooth_step
         if show_err:
             print(EG)
-            plt.plot(steps,abs((el-EG/nsite)), lw=2)
+            res = plt.plot(steps,abs((el-EG/nsite)), lw=2)[0]
         else:
-            plt.plot(steps,el, lw=2)
+            res = plt.plot(steps,el, lw=2)[0]
 
     plt.xlabel('Iteration')
     plt.ylabel(r'$\Delta \mathcal{E}/\mathcal{N}$' if show_err\
@@ -48,9 +48,10 @@ def show_el(datafiles, nsite, EG=None, xlogscale=True, window=None, legends=None
     if xlogscale: plt.xscale('log')
     if show_err: plt.yscale('log')
     if EG is not None and not show_err:
-        plt.axhline(y=EG/nsite, ls='--', color='#666666')
+        plt.axhline(y=EG/nsite, ls='--', color='#666666',label='_nolegend_')
     if window is not None: plt.ylim(*window)
     plt.legend(legends)
+    return res
 
 def scatter_vec_phase(v, v0=None, color='r', color0='b', winding=None):
     '''
