@@ -655,27 +655,27 @@ if __name__ == '__main__':
 Only Akira's fomulation (above notes) converges to $-10$ correctly, the old holomophic version (Roger Luo & GiggleLiu's version) are incorrect.
 
 ## A table of complex activation functions
-|                 Function                 |                    BP                    | Notes                                    |
-| :--------------------------------------: | :--------------------------------------: | ---------------------------------------- |
-|                 $\Re[x]$                 |         $\delta_x=\Re[\delta_y]$         |                                          |
-|                 $\Im[x]$                 |        $\delta_x=-i\Re[\delta_y]$        |                                          |
-|                  $x^*$                   |          $\delta_x=\delta_y^*$           |                                          |
-|                 $|x|^2$                  |       $\delta_x=2\Re[\delta_y]x^*$       | Following E.q. A                         |
-|                  $|x|$                   |       $\delta_x=\Re[\delta_y]s^*$        | $s\equiv e^{i\arg(x)}$ denote the sign part. |
-|      $\arg (x)\equiv-i\log(x/|x|)$       |   $\delta_x=\frac{-i}{x}\Re[\delta_y]$   |                                          |
-|            $s=\frac{x}{|x|}$             | $\delta_x=\frac{s^*}{|x|}i\Im[s\delta_y]$ | Noest 1988                               |
-| ${\rm relu}(x)=\begin{cases}x, &\Re[x]>0\land\Im[x]>0\\\Re[x],&\Re[x]>0\land\Im[x]<0\\\Im[x],&\Re[x]<0\land\Im[x]>0\\0,&\Re[x]<0\land\Im[x]<0\end{cases}$ | $\delta_x=\begin{cases}\delta_y, &\Re[x]>0\land\Im[x]>0\\\Re[\delta_y],&\Re[x]>0\land\Im[x]<0\\-i\Re[\delta_y],&\Re[x]<0\land\Im[x]>0\\0,&\Re[x]<0\land\Im[x]<0\end{cases}$ |                                          |
-|                 $h(|x|)$                 | $\delta_x=\Re[\delta_y]\frac{x^*}{|x|}\frac{\partial h}{\partial|x|}$ | - E.q. A                                 |
-|           $h(x,x^*), h\in\Re$            | $\delta_x=2\frac{\partial h}{\partial x}\delta_y$ | - E.q. E, $\delta_y$ is assumed real, because real node can not have complex gradient if the cost is real too. |
-|        $h(x,x^*)\cdot s, h\in\Re$        | $\delta_x=2\frac{\partial h}{\partial x}\Re[s\delta_y]+\frac{hs^*}{|x|}i\Im[s\delta_y]$ | - E.q. B                                 |
-|        $h(|x|,w)\cdot s, h\in\Re$        | $\delta_x=\frac{\partial h}{\partial |x|}s^*\Re[s\delta_y]+\frac{h}{|x|}s^*i\Im[s\delta_y]\\\delta_w=\frac{\partial h}{\partial w}\Re[s\delta_y]$ | - E.q. C, $w$ is assumed real.           |
-|                  $Wx+b$                  | $\delta_x=\delta_y^T W\\\delta_W=\delta_y^T \delta_x\\\delta_b=\delta_y$ |                                          |
-| Gaussian: $\frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{|x|^2}{2\sigma^2}}, \sigma\in\Re$ | $\delta_x = -\frac{(x-\mu)^*y}{\sigma^2}\delta_y\\\delta_\mu=\frac{\Re[x-\mu]y}{\sigma^2}\delta_y\\\delta_\sigma=\frac{|x-\mu|^2-\sigma^2}{\sigma^3}y\delta_y$ | Following E.q. C                         |
-| $h(\Re[x],w_h)+ig(\Im[x],w_g)$, $h,g,w_h,w_g\in \Re$ | $\delta_x=\frac{\partial h}{\partial\Re[x]}\Re[\delta_y]+i\frac{\partial g}{\partial \Im[x]}\Im[\delta_y]\\\delta_{w_h}=\frac{\partial h}{\partial\Re[x]}\Re[\delta_y]\\\delta_{w_g}=-\frac{\partial g}{\partial\Im[x]}\Im[\delta_y]$ | - E.q. D, e.g. $h=g=\sigma$ (Birx 1992),  $h=g=\tanh$ (Kechriotis 1994), $h=g=\frac{x}{c+x/r}$ (Kuroe 2005) |
-|           $\tanh (|x|)\cdot s$           | $\delta_x={\rm sech}(|x|)^2s^*\Re[s\delta_y]+\frac{\tanh(|x|)}{|x|}s^*i\Im[s\delta_y]$ | Hirose 1994 (Following E.q. C)           |
-|           $\frac{x}{c+|x|/r}$            | $\delta_x=\frac{c\delta_y+\frac{x^*}{r}i\Im[s\delta_y]}{(c+|x|/r)^2}$ | Georgiou 1992 (Following E.q. C)         |
-| Conformal: $\frac{e^{i\theta}(x-\alpha)}{1-\alpha^* x}$ |                holomophic                | $θ$ is a rotation angle, $α$ is a complex constant with $|α| < 1$ (Clarke 1990) |
-|       Mobius: $\frac{ax+b}{cx+d}$        |                holomophic                | $a, b, c, d ∈ \mathbb{C}$ and $ad − bc = 1$ (Mandic 2000) |
+|                           Function                           |                              BP                              | Notes                                                        |
+| :----------------------------------------------------------: | :----------------------------------------------------------: | ------------------------------------------------------------ |
+|                           $\Re[x]$                           |                   $\delta_x=\Re[\delta_y]$                   |                                                              |
+|                           $\Im[x]$                           |                  $\delta_x=-i\Re[\delta_y]$                  |                                                              |
+|                            $x^*$                             |                    $\delta_x=\delta_y^*$                     |                                                              |
+|                           $|x|^2$                            |                 $\delta_x=2\Re[\delta_y]x^*$                 | Following E.q. A                                             |
+|                            $|x|$                             |                 $\delta_x=\Re[\delta_y]s^*$                  | $s\equiv e^{i\arg(x)}$ denote the sign part.                 |
+|                $\arg (x)\equiv-i\log(x/|x|)$                 |             $\delta_x=\frac{-i}{x}\Re[\delta_y]$             |                                                              |
+|                      $s=\frac{x}{|x|}$                       |          $\delta_x=\frac{s^*}{|x|}i\Im[s\delta_y]$           | Noest 1988                                                   |
+| ${\rm relu}(x)=\begin{cases}x, &\Re[x]>0\land\Im[x]>0\\\Re[x],&\Re[x]>0\land\Im[x]<0\\\Im[x],&\Re[x]<0\land\Im[x]>0\\0,&\Re[x]<0\land\Im[x]<0\end{cases}$ | $\delta_x=\begin{cases}\delta_y, &\Re[x]>0\land\Im[x]>0\\\Re[\delta_y],&\Re[x]>0\land\Im[x]<0\\-i\Re[\delta_y],&\Re[x]<0\land\Im[x]>0\\0,&\Re[x]<0\land\Im[x]<0\end{cases}$ |                                                              |
+|                           $h(|x|)$                           | $\delta_x=\Re[\delta_y]\frac{x^*}{|x|}\frac{\partial h}{\partial|x|}$ | - E.q. A                                                     |
+|                     $h(x,x^*), h\in\Re$                      |      $\delta_x=2\frac{\partial h}{\partial x}\delta_y$       | - E.q. E, $\delta_y$ is assumed real, because real node can not have complex gradient if the cost is real too. |
+|                  $h(x,x^*)\cdot s, h\in\Re$                  | $\delta_x=2\frac{\partial h}{\partial x}\Re[s\delta_y]+\frac{hs^*}{|x|}i\Im[s\delta_y]$ | - E.q. B                                                     |
+|                  $h(|x|,w)\cdot s, h\in\Re$                  | $\delta_x=\frac{\partial h}{\partial |x|}s^*\Re[s\delta_y]+\frac{h}{|x|}s^*i\Im[s\delta_y]\\\delta_w=\frac{\partial h}{\partial w}\Re[s\delta_y]$ | - E.q. C, $w$ is assumed real.                               |
+|                            $Wx+b$                            | $\delta_x=\delta_y^T W\\\delta_W=\delta_y^T x\\\delta_b=\delta_y$ |                                                              |
+| Gaussian: $\frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{|x|^2}{2\sigma^2}}, \sigma\in\Re$ | $\delta_x = -\frac{(x-\mu)^*y}{\sigma^2}\delta_y\\\delta_\mu=\frac{\Re[x-\mu]y}{\sigma^2}\delta_y\\\delta_\sigma=\frac{|x-\mu|^2-\sigma^2}{\sigma^3}y\delta_y$ | Following E.q. C                                             |
+|     $h(\Re[x],w_h)+ig(\Im[x],w_g)$, $h,g,w_h,w_g\in \Re$     | $\delta_x=\frac{\partial h}{\partial\Re[x]}\Re[\delta_y]+i\frac{\partial g}{\partial \Im[x]}\Im[\delta_y]\\\delta_{w_h}=\frac{\partial h}{\partial\Re[x]}\Re[\delta_y]\\\delta_{w_g}=-\frac{\partial g}{\partial\Im[x]}\Im[\delta_y]$ | - E.q. D, e.g. $h=g=\sigma$ (Birx 1992),  $h=g=\tanh$ (Kechriotis 1994), $h=g=\frac{x}{c+x/r}$ (Kuroe 2005) |
+|                     $\tanh (|x|)\cdot s$                     | $\delta_x={\rm sech}(|x|)^2s^*\Re[s\delta_y]+\frac{\tanh(|x|)}{|x|}s^*i\Im[s\delta_y]$ | Hirose 1994 (Following E.q. C)                               |
+|                     $\frac{x}{c+|x|/r}$                      | $\delta_x=\frac{c\delta_y+\frac{x^*}{r}i\Im[s\delta_y]}{(c+|x|/r)^2}$ | Georgiou 1992 (Following E.q. C)                             |
+|   Conformal: $\frac{e^{i\theta}(x-\alpha)}{1-\alpha^* x}$    |                          holomophic                          | $θ$ is a rotation angle, $α$ is a complex constant with $|α| < 1$ (Clarke 1990) |
+|                 Mobius: $\frac{ax+b}{cx+d}$                  |                          holomophic                          | $a, b, c, d ∈ \mathbb{C}$ and $ad − bc = 1$ (Mandic 2000)    |
 
 # Day 16 Oct
 ## Exponentialized variables
